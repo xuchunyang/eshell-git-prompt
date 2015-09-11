@@ -80,6 +80,14 @@ For example:
         (file-name-nondirectory (substring dir 0 -1))
       dir)))
 
+(defun eshell-git-prompt-last-command-status ()
+  "Return Eshell last command execution status.
+When Eshell just launches, `eshell-last-command-status' is not defined yet,
+return 0 (i.e., success)."
+  (if (not (boundp 'eshell-last-command-status))
+      0
+    eshell-last-command-status))
+
 (defconst eshell-git-prompt---git-global-arguments
   '("--no-pager" "--literal-pathspecs" "-c" "core.preloadindex=true")
   "Global git arguments.")
@@ -140,19 +148,46 @@ If working directory is clean, return nil."
             :deleted-updated deleted-updated
             :renamed-updated renamed-updated))))
 
-(defun eshell-git-prompt--current-branch ()
+(defun eshell-git-prompt--branch-name ()
+  "Return current branch name."
   (eshell-git-prompt--git-string "symbolic-ref" "HEAD" "--short"))
 
-(defun eshell-git-prompt-last-command-status ()
-  "Return Eshell last command execution status.
-When Eshell just launches, `eshell-last-command-status' is not defined yet,
-return 0 (i.e., success)."
-  (if (not (boundp 'eshell-last-command-status))
-      0
-    eshell-last-command-status))
+(defun eshell-git-prompt--commit-short-sha ()
+  (eshell-git-prompt--git-string "rev-parse" "--short" "HEAD"))
+
+(defun  eshell-git-prompt--readable-branch-name ()
+  (-if-let (branch-name (eshell-git-prompt--branch-name))
+      branch-name
+    (concat "detached@" (eshell-git-prompt--commit-short-sha))))
+
+(defun eshell-git-prompt--remote-branch-name ()
+  (eshell-git-prompt--git-string "for-each-ref" "--format=%(upstream:short)"
+                                 (format "refs/heads/%s"
+                                         (eshell-git-prompt--branch-name))))
+
+(defun eshell-git-prompt--commits-ahead-of-remote ()
+  (-if-let (remote-branch-name (eshell-git-prompt--remote-branch-name))
+      (string-to-number
+       (eshell-git-prompt--git-string "rev-list" "--left-only" "--count"
+                                      (format "%s...HEAD" remote-branch-name)))
+    0))
+
+(defun eshell-git-prompt--commits-behind-of-remote ()
+  (-if-let (remote-branch-name (eshell-git-prompt--remote-branch-name))
+      (string-to-number
+       (eshell-git-prompt--git-string "rev-list" "--right-only" "--count"
+                                      (format "%s...HEAD" remote-branch-name)))
+    0))
 
 
 ;;; * Themes
+
+;; the Eshell default prompt
+(defun eshell-git-prompt-default-func ()
+  (concat (abbreviate-file-name (eshell/pwd))
+          (if (= (user-uid) 0) " # " " $ ")))
+
+(defconst eshell-git-prompt-default-regexp "^[^#$\n]* [#$] ")
 
 ;; oh-my-zsh's robbyrussell theme
 ;; see https://github.com/robbyrussell/oh-my-zsh/wiki/Themes#robbyrussell
@@ -176,7 +211,7 @@ It should be set as value of `eshell-prompt-function', at the same time,
      (concat
       " "
       (propertize "git:(" 'face '(:foreground "blue"))
-      (propertize (eshell-git-prompt--current-branch)
+      (propertize (eshell-git-prompt--readable-branch-name)
                   'face '(:foreground "red"))
       (propertize ")" 'face '(:foreground "blue"))
       (when (eshell-git-prompt--collect-status)
@@ -187,13 +222,6 @@ It should be set as value of `eshell-prompt-function', at the same time,
    (propertize "$" 'invisible t) " "))
 
 (defconst eshell-git-prompt-robbyrussell-regexp "^[^$\n]*\\\$ ")
-
-;; the Eshell default prompt
-(defun eshell-git-prompt-default-func ()
-  (concat (abbreviate-file-name (eshell/pwd))
-          (if (= (user-uid) 0) " # " " $ ")))
-
-(defconst eshell-git-prompt-default-regexp "^[^#$\n]* [#$] ")
 
 (defvar eshell-git-prompt-themes
   '((robbyrussell
