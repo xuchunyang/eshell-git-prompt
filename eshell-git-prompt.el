@@ -289,6 +289,7 @@ It should be set as value of `eshell-prompt-function', at the same time,
 
 ;;;###autoload
 (defun eshell-git-prompt-use-theme (theme)
+  "Pick up a Eshell prompt theme from `eshell-git-prompt-themes' to use."
   (interactive
    (let ((theme
           (completing-read "Use theme:"
@@ -302,7 +303,11 @@ It should be set as value of `eshell-prompt-function', at the same time,
       (progn
         (setq eshell-prompt-function (symbol-function (car func-regexp))
               eshell-prompt-regexp (symbol-value (cadr func-regexp)))
-        (setq eshell-git-prompt-current-theme theme))
+        (setq eshell-git-prompt-current-theme theme)
+        (when (called-interactively-p)
+          (message
+           "Now, kill all Eshell buffers and re-enter Eshell to use %s theme."
+           (symbol-name theme))))
     (user-error "Theme \"%s\" is not available." theme)))
 
 (provide 'eshell-git-prompt)
