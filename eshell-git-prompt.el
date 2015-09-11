@@ -3,9 +3,11 @@
 ;; Copyright (C) 2015  Chunyang Xu
 
 ;; Author: Chunyang Xu <xuchunyang56@gmail.com>
+;; URL: https://github.com/xuchunyang/eshell-git-prompt
 ;; Package-Requires: ((emacs "24.1") (dash "2.11.0"))
 ;; Keywords: eshell git
 ;; Version: 0.1
+;; Created: 09/11/2015
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
