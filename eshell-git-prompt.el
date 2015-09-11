@@ -37,6 +37,9 @@
 
 (require 'cl-lib)
 (require 'dash)
+
+;;; * Customization
+
 
 
 ;;; * Internal
@@ -131,13 +134,20 @@ If working directory is clean, return nil. "
 It should be set as value of `eshell-prompt-function', at the same time,
 `eshell-prompt-regexp' also MUST to be set to match the return of
 `eshell-prompt-function'."
-  (concat (eshell-git-prompt--shorten-directory-name)
+  (concat (propertize (eshell-git-prompt--shorten-directory-name)
+                      'face '(:foreground "cyan"))
           ;; Yo, we are in a Git repo, display some information about it
           (when (eshell-git-prompt--git-root-dir)
             (concat
-             (format " git:(%s)" (eshell-git-prompt--current-branch))
+             " "
+             (propertize "git:(" 'face '(:foreground "blue"))
+             (propertize (eshell-git-prompt--current-branch)
+                         'face '(:foreground "red"))
+             (propertize ")" 'face '(:foreground "blue"))
              (when (eshell-git-prompt--collect-status)
-               " ✗")))
+               (concat
+                " "
+                (propertize "✗" 'face '(:foreground "yellow"))))))
           " "))
 
 ;;;###autoload
