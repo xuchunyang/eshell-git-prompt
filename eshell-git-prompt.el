@@ -127,6 +127,14 @@ If working directory is clean, return nil."
 (defun eshell-git-prompt--current-branch ()
   (eshell-git-prompt--git-string "symbolic-ref" "HEAD" "--short"))
 
+(defun eshell-git-prompt-last-command-status ()
+  "Return Eshell last command execution status.
+When Eshell just launches, `eshell-last-command-status' is not defined yet,
+return 0 (i.e., success)."
+  (if (not (boundp 'eshell-last-command-status))
+      0
+    eshell-last-command-status))
+
 
 (defun eshell-git-prompt-eshell-prompt ()
   "Eshell Git prompt.
@@ -134,21 +142,28 @@ If working directory is clean, return nil."
 It should be set as value of `eshell-prompt-function', at the same time,
 `eshell-prompt-regexp' also MUST to be set to match the return of
 `eshell-prompt-function'."
-  (concat (propertize (eshell-git-prompt--shorten-directory-name)
-                      'face '(:foreground "cyan"))
-          ;; Yo, we are in a Git repo, display some information about it
-          (when (eshell-git-prompt--git-root-dir)
-            (concat
-             " "
-             (propertize "git:(" 'face '(:foreground "blue"))
-             (propertize (eshell-git-prompt--current-branch)
-                         'face '(:foreground "red"))
-             (propertize ")" 'face '(:foreground "blue"))
-             (when (eshell-git-prompt--collect-status)
-               (concat
-                " "
-                (propertize "✗" 'face '(:foreground "yellow"))))))
-          " "))
+  ;; FIXME: This is too ugly.
+  (concat
+   (propertize "➜" 'face
+               `(:foreground
+                 ,(if (zerop (eshell-git-prompt-last-command-status))
+                      "green" "red")))
+   " "
+   (propertize (eshell-git-prompt--shorten-directory-name)
+               'face '(:foreground "cyan"))
+   ;; Yo, we are in a Git repo, display some information about it
+   (when (eshell-git-prompt--git-root-dir)
+     (concat
+      " "
+      (propertize "git:(" 'face '(:foreground "blue"))
+      (propertize (eshell-git-prompt--current-branch)
+                  'face '(:foreground "red"))
+      (propertize ")" 'face '(:foreground "blue"))
+      (when (eshell-git-prompt--collect-status)
+        (concat
+         " "
+         (propertize "✗" 'face '(:foreground "yellow"))))))
+   " "))
 
 ;;;###autoload
 (defun eshell-git-prompt-setup-default ()
