@@ -91,11 +91,33 @@ Empty lines anywhere in the output are omitted. "
     (split-string (buffer-string) "\n" t)))
 
 (defun eshell-git-prompt--collect-status ()
-  "Collect informative on the working tree status."
-  (let ((untracked 0))
-    (--each (eshell-git-prompt--git-lines "status" "--porcelain")
-      (cond ((string-prefix-p "??" it) (cl-incf untracked))))
-    (list :untracked untracked)))
+  "Return working directory status as a plist.
+If working directory is clean, return nil. "
+  (let ((untracked 0)                   ; next git-add, then git-commit
+        (modified 0)                    ; next git-commit
+        (modified-updated 0)            ; next git-commit
+        (new-added 0)                   ; next git-commit
+        (deleted 0)                     ; next git-rm, then git-commit
+        (deleted-updated 0)             ; next git-commit
+        (renamed-updated 0)             ; next git-commit
+        )
+    (-when-let (status-items (eshell-git-prompt--git-lines "status" "--porcelain"))
+      (--each status-items
+        (pcase (substring it 0 2)
+          ("??" (cl-incf untracked))
+          ("MM" (progn (cl-incf modified)
+                       (cl-incf modified-updated)))
+          ("A " (cl-incf new-added))
+          (" D" (cl-incf deleted))
+          ("D " (cl-incf deleted-updated))
+          ("R " (cl-incf renamed-updated))))
+      (list :untracked untracked
+            :modified modified
+            :modified-updated  modified-updated
+            :new-added new-added
+            :deleted deleted
+            :deleted-updated deleted-updated
+            :renamed-updated renamed-updated))))
 
 (defun eshell-git-prompt--current-branch ()
   (eshell-git-prompt--git-string "symbolic-ref" "HEAD" "--short"))
@@ -112,12 +134,8 @@ It should be set as value of `eshell-prompt-function', at the same time,
           (when (eshell-git-prompt--git-root-dir)
             (concat
              (format " git:(%s)" (eshell-git-prompt--current-branch))
-             (let ((untracked-file
-                    (plist-get (eshell-git-prompt--collect-status)
-                               :untracked)))
-               (when (> untracked-file 0)
-                 (format " A%d" untracked-file))))
-            )
+             (when (eshell-git-prompt--collect-status)
+               " ✗")))
           " "))
 
 ;;;###autoload
