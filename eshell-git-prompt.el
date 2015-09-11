@@ -55,6 +55,14 @@
 
 (require 'cl-lib)
 (require 'dash)
+
+(declare-function eshell/pwd "em-dirs")
+
+(eval-when-compile
+  (defvar eshell-last-command-status)
+  (defvar eshell-prompt-function)
+  (defvar eshell-prompt-regexp))
+
 
 ;;; * Customization
 (defcustom eshell-git-prompt-themes
@@ -309,11 +317,11 @@ It should be set as value of `eshell-prompt-function', at the same time,
         (setq eshell-prompt-function (symbol-function (car func-regexp))
               eshell-prompt-regexp (symbol-value (cadr func-regexp)))
         (setq eshell-git-prompt-current-theme theme)
-        (when (called-interactively-p)
+        (when (called-interactively-p 'interactive)
           (message
-           "Now, kill all Eshell buffers and re-enter Eshell to use %s theme."
+           "Now kill all Eshell buffers and re-enter Eshell to use %s theme"
            (symbol-name theme))))
-    (user-error "Theme \"%s\" is not available." theme)))
+    (user-error "Theme \"%s\" is not available" theme)))
 
 (provide 'eshell-git-prompt)
 
