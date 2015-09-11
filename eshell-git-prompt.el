@@ -57,6 +57,21 @@
 (require 'dash)
 
 ;;; * Customization
+(defcustom eshell-git-prompt-themes
+  '((robbyrussell
+     eshell-git-prompt-robbyrussell
+     eshell-git-prompt-robbyrussell-regexp)
+    (git-radar
+     eshell-git-prompt-git-radar
+     eshell-git-prompt-git-radar-regexp)
+    (default
+      eshell-git-prompt-default-func
+      eshell-git-prompt-default-regexp))
+  "A list of all available themes.
+You can add your own theme to this list, then run
+`eshell-git-prompt-use-theme' to use it."
+  :group 'eshell-prompt
+  :type '(repeat (list symbol symbol symbol)))
 
 
 ;;; * Internal
@@ -272,18 +287,6 @@ It should be set as value of `eshell-prompt-function', at the same time,
    (propertize "$" 'invisible t) " "))
 
 (defconst eshell-git-prompt-git-radar-regexp "^[^$\n]*\\\$ ")
-
-(defvar eshell-git-prompt-themes
-  '((robbyrussell
-     eshell-git-prompt-robbyrussell
-     eshell-git-prompt-robbyrussell-regexp)
-    (git-radar
-     eshell-git-prompt-git-radar
-     eshell-git-prompt-git-radar-regexp)
-    (default
-      eshell-git-prompt-default-func
-      eshell-git-prompt-default-regexp))
-  "All available themes.")
 
 (defvar eshell-git-prompt-current-theme nil)
 
