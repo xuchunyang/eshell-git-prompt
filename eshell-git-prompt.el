@@ -165,6 +165,18 @@ It should be set as value of `eshell-prompt-function', at the same time,
          (propertize "✗" 'face '(:foreground "yellow"))))))
    " "))
 
+(require 'em-prompt)
+
+(defvar eshell-git-prompt--eshell-prompt-function eshell-prompt-function)
+(defvar eshell-git-prompt--eshell-prompt-regexp eshell-prompt-regexp)
+
+(defun eshell-git-prompt-revert ()
+  "Revert to the default Eshell prompt."
+  (interactive)
+  (setq eshell-prompt-function eshell-git-prompt--eshell-prompt-function
+        eshell-prompt-regexp eshell-git-prompt--eshell-prompt-regexp)
+  (message "Now, re-enter Eshell to use the default Eshell prompt."))
+
 ;;;###autoload
 (defun eshell-git-prompt-setup-default ()
   "Setup Eshell Git prompt."
