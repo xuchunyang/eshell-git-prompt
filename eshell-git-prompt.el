@@ -90,6 +90,16 @@ Empty lines anywhere in the output are omitted. "
     (apply #'eshell-git-prompt--git-insert args)
     (split-string (buffer-string) "\n" t)))
 
+(defun eshell-git-prompt--collect-status ()
+  "Collect informative on the working tree status."
+  (let ((untracked 0))
+    (--each (eshell-git-prompt--git-lines "status" "--porcelain")
+      (cond ((string-prefix-p "??" it) (cl-incf untracked))))
+    (list :untracked untracked)))
+
+(defun eshell-git-prompt--current-branch ()
+  (eshell-git-prompt--git-string "symbolic-ref" "HEAD" "--short"))
+
 
 (defun eshell-git-prompt-eshell-prompt ()
   "Eshell Git prompt.
@@ -98,9 +108,16 @@ It should be set as value of `eshell-prompt-function', at the same time,
 `eshell-prompt-regexp' also MUST to be set to match the return of
 `eshell-prompt-function'."
   (concat (eshell-git-prompt--shorten-directory-name)
+          ;; Yo, we are in a Git repo, display some information about it
           (when (eshell-git-prompt--git-root-dir)
-            (format " git:(%s)" (eshell-git-prompt--git-string
-                                 "symbolic-ref" "HEAD" "--short")))
+            (concat
+             (format " git:(%s)" (eshell-git-prompt--current-branch))
+             (let ((untracked-file
+                    (plist-get (eshell-git-prompt--collect-status)
+                               :untracked)))
+               (when (> untracked-file 0)
+                 (format " A%d" untracked-file))))
+            )
           " "))
 
 ;;;###autoload
@@ -111,4 +128,9 @@ It should be set as value of `eshell-prompt-function', at the same time,
                                            "^[^\n]* git(.*) "))))
 
 (provide 'eshell-git-prompt)
+
+;; Local Variables:
+;; lisp-indent-function: common-lisp-indent-function
+;; End:
+
 ;;; eshell-git-prompt.el ends here
