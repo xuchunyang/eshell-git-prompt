@@ -228,6 +228,8 @@ It should be set as value of `eshell-prompt-function', at the same time,
                'face '(:foreground "cyan"))
    ;; Yo, we are in a Git repo, display some information about it
    (when (eshell-git-prompt--git-root-dir)
+     (setq eshell-git-prompt-branch-name
+           (eshell-git-prompt--branch-name))
      (concat
       " "
       (propertize "git:(" 'face '(:foreground "blue"))
