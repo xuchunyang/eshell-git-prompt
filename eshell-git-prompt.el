@@ -24,9 +24,13 @@
 
 ;;; Commentary:
 ;;
-;; Setup:
+;; Usage:
+;; You can call `eshell-git-prompt-use-theme' to pick up a theme then launch
+;; Eshell.
 ;;
-;;   (eshell-git-prompt-setup-default)
+;; Add the following to your initialization file to let Eshell to use it every
+;; time:
+;;   (eshell-git-prompt-use-theme 'robbyrussell)
 ;;
 ;; TODO
 ;; - [ ] Acquire more meta data like [[https://github.com/michaeldfallen/git-radar][michaeldfallen/git-radar]]
