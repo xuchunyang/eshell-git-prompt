@@ -33,6 +33,7 @@
 ;;   (eshell-git-prompt-use-theme 'robbyrussell)
 ;;
 ;; TODO
+;; - [ ] Try the built-in package `ansi-color'
 ;; - [ ] Acquire more meta data like [[https://github.com/michaeldfallen/git-radar][michaeldfallen/git-radar]]
 ;; - [ ] Tweak faces
 ;; - [ ] Add one or two themes
@@ -152,30 +153,34 @@ If working directory is clean, return nil."
   "Return current branch name."
   (eshell-git-prompt--git-string "symbolic-ref" "HEAD" "--short"))
 
+(defvar eshell-git-prompt-branch-name nil)
+
 (defun eshell-git-prompt--commit-short-sha ()
   (eshell-git-prompt--git-string "rev-parse" "--short" "HEAD"))
 
 (defun  eshell-git-prompt--readable-branch-name ()
-  (-if-let (branch-name (eshell-git-prompt--branch-name))
+  (-if-let (branch-name eshell-git-prompt-branch-name)
       branch-name
     (concat "detached@" (eshell-git-prompt--commit-short-sha))))
 
 (defun eshell-git-prompt--remote-branch-name ()
   (eshell-git-prompt--git-string "for-each-ref" "--format=%(upstream:short)"
                                  (format "refs/heads/%s"
-                                         (eshell-git-prompt--branch-name))))
+                                         eshell-git-prompt-branch-name)))
+
+(defvar eshell-git-prompt-remote-branch-name nil)
 
 (defun eshell-git-prompt--commits-ahead-of-remote ()
-  (-if-let (remote-branch-name (eshell-git-prompt--remote-branch-name))
+  (-if-let (remote-branch-name eshell-git-prompt-remote-branch-name)
       (string-to-number
-       (eshell-git-prompt--git-string "rev-list" "--left-only" "--count"
+       (eshell-git-prompt--git-string "rev-list" "--right-only" "--count"
                                       (format "%s...HEAD" remote-branch-name)))
     0))
 
 (defun eshell-git-prompt--commits-behind-of-remote ()
-  (-if-let (remote-branch-name (eshell-git-prompt--remote-branch-name))
+  (-if-let (remote-branch-name eshell-git-prompt-remote-branch-name)
       (string-to-number
-       (eshell-git-prompt--git-string "rev-list" "--right-only" "--count"
+       (eshell-git-prompt--git-string "rev-list" "--left-only" "--count"
                                       (format "%s...HEAD" remote-branch-name)))
     0))
 
@@ -191,8 +196,8 @@ If working directory is clean, return nil."
 
 ;; oh-my-zsh's robbyrussell theme
 ;; see https://github.com/robbyrussell/oh-my-zsh/wiki/Themes#robbyrussell
-(defun eshell-git-prompt-robbyrussell-func ()
-  "Eshell Git prompt.
+(defun eshell-git-prompt-robbyrussell ()
+  "Eshell Git prompt with oh-my-zsh's robbyrussell theme.
 
 It should be set as value of `eshell-prompt-function', at the same time,
 `eshell-prompt-regexp' also MUST to be set to match the return of
@@ -223,10 +228,58 @@ It should be set as value of `eshell-prompt-function', at the same time,
 
 (defconst eshell-git-prompt-robbyrussell-regexp "^[^$\n]*\\\$ ")
 
+;; git-radar
+;; see https://github.com/michaeldfallen/git-radar
+
+(defun eshell-git-prompt-git-radar ()
+  "Eshell Git prompt inspired by git-radar."
+  (concat
+   (propertize "➜" 'face
+               `(:foreground
+                 ,(if (zerop (eshell-git-prompt-last-command-status))
+                      "green" "red")))
+   " "
+   (propertize (eshell-git-prompt--shorten-directory-name)
+               'face '(:foreground "cyan"))
+   ;; Yo, we are in a Git repo, display some information about it
+   (when (eshell-git-prompt--git-root-dir)
+     (setq eshell-git-prompt-branch-name
+           (eshell-git-prompt--branch-name)
+           eshell-git-prompt-remote-branch-name
+           (eshell-git-prompt--remote-branch-name))
+     (concat
+      (concat
+       " "
+       (propertize "git:(" 'face '(:foreground "dark gray"))
+       (propertize (eshell-git-prompt--readable-branch-name)
+                   'face '(:foreground "gray"))
+                                        ;
+       (when eshell-git-prompt-remote-branch-name
+         (let ((local-behind (eshell-git-prompt--commits-behind-of-remote))
+               (local-ahead (eshell-git-prompt--commits-ahead-of-remote)))
+           (cond ((and (> local-ahead 0) (> local-behind 0))
+                  (concat " " (number-to-string local-behind)
+                          (propertize "⇵" 'face '(:foreground "yellow")) (number-to-string local-ahead)))
+                 ((> local-behind 0)
+                  (concat " " (number-to-string local-behind) (propertize "↓" 'face '(:foreground "red"))))
+                 ((> local-ahead 0)
+                  (concat " " (number-to-string local-ahead) (propertize "↑" 'face '(:foreground "green")))))))
+       (propertize ")" 'face '(:foreground "dark gray"))
+       ;; TODO file status
+       )
+      ))
+   ;; To make it possible to let `eshell-prompt-regexp' to match the full prompt
+   (propertize "$" 'invisible t) " "))
+
+(defconst eshell-git-prompt-git-radar-regexp "^[^$\n]*\\\$ ")
+
 (defvar eshell-git-prompt-themes
   '((robbyrussell
-     eshell-git-prompt-robbyrussell-func
+     eshell-git-prompt-robbyrussell
      eshell-git-prompt-robbyrussell-regexp)
+    (git-radar
+     eshell-git-prompt-git-radar
+     eshell-git-prompt-git-radar-regexp)
     (default
       eshell-git-prompt-default-func
       eshell-git-prompt-default-regexp))
