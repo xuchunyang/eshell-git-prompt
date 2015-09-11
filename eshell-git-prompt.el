@@ -43,7 +43,7 @@
 ;;   sometimes it is impossible, especially when you don't want use any special
 ;;   characters (e.g., '$') to state the end of your Eshell prompt
 ;; 3 If you set `eshell-prompt-function' or `eshell-prompt-regexp' incorrectly,
-;;   Eshell may crashes, if it happens, you can use `eshell-git-prompt-revert'
+;;   Eshell may crashes, if it happens, you can M-x `eshell-git-prompt-use-theme'
 ;;   to revert to the default Eshell prompt, then read Note #1.
 
 ;;; Code:
@@ -52,7 +52,6 @@
 (require 'dash)
 
 ;;; * Customization
-
 
 
 ;;; * Internal
@@ -153,7 +152,7 @@ return 0 (i.e., success)."
 
 ;; oh-my-zsh's robbyrussell theme
 ;; see https://github.com/robbyrussell/oh-my-zsh/wiki/Themes#robbyrussell
-(defun eshell-git-prompt-eshell-prompt ()
+(defun eshell-git-prompt-robbyrussell-func ()
   "Eshell Git prompt.
 
 It should be set as value of `eshell-prompt-function', at the same time,
@@ -183,25 +182,34 @@ It should be set as value of `eshell-prompt-function', at the same time,
    ;; To make it possible to let `eshell-prompt-regexp' to match the full prompt
    (propertize "$" 'invisible t) " "))
 
-;;;###autoload
-(defun eshell-git-prompt-setup-default ()
-  "Setup Eshell Git prompt."
-  (setq eshell-prompt-function #'eshell-git-prompt-eshell-prompt
-        eshell-prompt-regexp "^[^$\n]*\\\$ "))
+(defvar eshell-git-prompt-robbyrussell-regexp "^[^$\n]*\\\$ ")
 
-
-;;; * Restore command
 (require 'em-prompt)
 
-(defvar eshell-git-prompt--eshell-prompt-function eshell-prompt-function)
-(defvar eshell-git-prompt--eshell-prompt-regexp eshell-prompt-regexp)
+(defvar eshell-git-prompt-themes
+  `((robbyrussell
+     eshell-git-prompt-robbyrussell-func
+     eshell-git-prompt-robbyrussell-regexp)
+    (default
+        ,(symbol-value 'eshell-prompt-function)
+        ,eshell-prompt-regexp))
+  "All available themes.")
 
-(defun eshell-git-prompt-revert ()
-  "Revert to the default Eshell prompt."
-  (interactive)
-  (setq eshell-prompt-function eshell-git-prompt--eshell-prompt-function
-        eshell-prompt-regexp eshell-git-prompt--eshell-prompt-regexp)
-  (message "Now, re-enter Eshell to use the default Eshell prompt."))
+;;;###autoload
+(defun eshell-git-prompt-use-theme (theme)
+  (interactive
+   (let ((theme
+          (completing-read "Use theme:"
+                           (--map (symbol-name (car it))
+                                  eshell-git-prompt-themes)
+                           nil t)))
+     (list (intern theme))))
+  (when (stringp theme)
+    (setq theme (intern theme)))
+  (-if-let (func-regexp (assoc-default theme eshell-git-prompt-themes))
+      (setq eshell-prompt-function (car func-regexp)
+            eshell-prompt-regexp (cdr func-regexp))
+    (user-error "Theme \"%s\" is not available." theme)))
 
 (provide 'eshell-git-prompt)
 
