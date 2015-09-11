@@ -69,12 +69,12 @@ For example:
   "Global git arguments.")
 
 (defun eshell-git-prompt--process-git-arguments (args)
-  "Prepare ARGS for a function that invokes Git. "
+  "Prepare ARGS for a function that invokes Git."
   (setq args (-flatten args))
   (append eshell-git-prompt---git-global-arguments args))
 
 (defun eshell-git-prompt--git-insert (&rest args)
-  "Execute Git with ARGS, inserting its output at point. "
+  "Execute Git with ARGS, inserting its output at point."
   (setq args (eshell-git-prompt--process-git-arguments args))
   (apply #'process-file "git" nil (list t nil) nil args))
 
@@ -90,14 +90,14 @@ newline return an empty string."
 
 (defun eshell-git-prompt--git-lines (&rest args)
   "Execute Git with ARGS, returning its output as a list of lines.
-Empty lines anywhere in the output are omitted. "
+Empty lines anywhere in the output are omitted."
   (with-temp-buffer
     (apply #'eshell-git-prompt--git-insert args)
     (split-string (buffer-string) "\n" t)))
 
 (defun eshell-git-prompt--collect-status ()
   "Return working directory status as a plist.
-If working directory is clean, return nil. "
+If working directory is clean, return nil."
   (let ((untracked 0)                   ; next git-add, then git-commit
         (modified 0)                    ; next git-commit
         (modified-updated 0)            ; next git-commit
