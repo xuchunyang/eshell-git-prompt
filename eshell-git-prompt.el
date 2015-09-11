@@ -195,8 +195,8 @@ It should be set as value of `eshell-prompt-function', at the same time,
      eshell-git-prompt-robbyrussell-func
      eshell-git-prompt-robbyrussell-regexp)
     (default
-        ,(symbol-value 'eshell-prompt-function)
-        ,eshell-prompt-regexp))
+      ,(symbol-value 'eshell-prompt-function)
+      ,eshell-prompt-regexp))
   "All available themes.")
 
 ;;;###autoload
@@ -216,9 +216,5 @@ It should be set as value of `eshell-prompt-function', at the same time,
     (user-error "Theme \"%s\" is not available." theme)))
 
 (provide 'eshell-git-prompt)
-
-;; Local Variables:
-;; lisp-indent-function: common-lisp-indent-function
-;; End:
 
 ;;; eshell-git-prompt.el ends here
