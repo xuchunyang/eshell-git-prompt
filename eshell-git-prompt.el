@@ -136,6 +136,10 @@ return 0 (i.e., success)."
     eshell-last-command-status))
 
 
+;;; * Themes
+
+;; oh-my-zsh's robbyrussell theme
+;; see https://github.com/robbyrussell/oh-my-zsh/wiki/Themes#robbyrussell
 (defun eshell-git-prompt-eshell-prompt ()
   "Eshell Git prompt.
 
@@ -163,8 +167,17 @@ It should be set as value of `eshell-prompt-function', at the same time,
         (concat
          " "
          (propertize "✗" 'face '(:foreground "yellow"))))))
-   " "))
+   ;; To make it possible to let `eshell-prompt-regexp' to match the full prompt
+   (propertize "$" 'invisible t) " "))
 
+;;;###autoload
+(defun eshell-git-prompt-setup-default ()
+  "Setup Eshell Git prompt."
+  (setq eshell-prompt-function #'eshell-git-prompt-eshell-prompt
+        eshell-prompt-regexp "^[^$\n]*\\\$ "))
+
+
+;;; * Restore command
 (require 'em-prompt)
 
 (defvar eshell-git-prompt--eshell-prompt-function eshell-prompt-function)
@@ -176,14 +189,6 @@ It should be set as value of `eshell-prompt-function', at the same time,
   (setq eshell-prompt-function eshell-git-prompt--eshell-prompt-function
         eshell-prompt-regexp eshell-git-prompt--eshell-prompt-regexp)
   (message "Now, re-enter Eshell to use the default Eshell prompt."))
-
-;;;###autoload
-(defun eshell-git-prompt-setup-default ()
-  "Setup Eshell Git prompt."
-  (setq eshell-prompt-function #'eshell-git-prompt-eshell-prompt
-        eshell-prompt-regexp (regexp-opt '("➜ ^[^\n]* "
-                                           "➜ ^[^\n]* git(.*) "
-                                           "➜ ^[^\n]* git(.*) ✗ "))))
 
 (provide 'eshell-git-prompt)
 
