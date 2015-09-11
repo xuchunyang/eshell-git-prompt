@@ -143,7 +143,8 @@ It should be set as value of `eshell-prompt-function', at the same time,
   "Setup Eshell Git prompt."
   (setq eshell-prompt-function #'eshell-git-prompt-eshell-prompt
         eshell-prompt-regexp (regexp-opt '("^[^\n]* "
-                                           "^[^\n]* git(.*) "))))
+                                           "^[^\n]* git(.*) "
+                                           "^[^\n]* git(.*) ✗ "))))
 
 (provide 'eshell-git-prompt)
 
