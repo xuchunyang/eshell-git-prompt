@@ -186,18 +186,25 @@ It should be set as value of `eshell-prompt-function', at the same time,
    ;; To make it possible to let `eshell-prompt-regexp' to match the full prompt
    (propertize "$" 'invisible t) " "))
 
-(defvar eshell-git-prompt-robbyrussell-regexp "^[^$\n]*\\\$ ")
+(defconst eshell-git-prompt-robbyrussell-regexp "^[^$\n]*\\\$ ")
 
-(require 'em-prompt)
+;; the Eshell default prompt
+(defun eshell-git-prompt-default-func ()
+  (concat (abbreviate-file-name (eshell/pwd))
+          (if (= (user-uid) 0) " # " " $ ")))
+
+(defconst eshell-git-prompt-default-regexp "^[^#$\n]* [#$] ")
 
 (defvar eshell-git-prompt-themes
-  `((robbyrussell
+  '((robbyrussell
      eshell-git-prompt-robbyrussell-func
      eshell-git-prompt-robbyrussell-regexp)
     (default
-      ,(symbol-value 'eshell-prompt-function)
-      ,eshell-prompt-regexp))
+      eshell-git-prompt-default-func
+      eshell-git-prompt-default-regexp))
   "All available themes.")
+
+(defvar eshell-git-prompt-current-theme nil)
 
 ;;;###autoload
 (defun eshell-git-prompt-use-theme (theme)
@@ -211,8 +218,10 @@ It should be set as value of `eshell-prompt-function', at the same time,
   (when (stringp theme)
     (setq theme (intern theme)))
   (-if-let (func-regexp (assoc-default theme eshell-git-prompt-themes))
-      (setq eshell-prompt-function (car func-regexp)
-            eshell-prompt-regexp (cdr func-regexp))
+      (progn
+        (setq eshell-prompt-function (symbol-function (car func-regexp))
+              eshell-prompt-regexp (symbol-value (cadr func-regexp)))
+        (setq eshell-git-prompt-current-theme theme))
     (user-error "Theme \"%s\" is not available." theme)))
 
 (provide 'eshell-git-prompt)
