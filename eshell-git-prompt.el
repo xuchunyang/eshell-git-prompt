@@ -84,6 +84,10 @@ You can add your own theme to this list, then run
 
 ;;; * Internal
 
+(defmacro with-face (str &rest properties)
+  (declare (indent 1))
+  `(propertize ,str 'face (list ,@properties)))
+
 (cl-defun eshell-git-prompt--git-root-dir
     (&optional (directory default-directory))
   "Return Git root directory name if exist, otherwise, return nil."
@@ -222,32 +226,27 @@ If working directory is clean, return nil."
 (defun eshell-git-prompt-robbyrussell ()
   "Eshell Git prompt with oh-my-zsh's robbyrussell theme.
 
-It should be set as value of `eshell-prompt-function', at the same time,
-`eshell-prompt-regexp' also MUST to be set to match the return of
-`eshell-prompt-function'."
-  ;; FIXME: This is too ugly.
+It looks like:
+
+➜ eshell-git-prompt git:(master) ✗ git status "
   (concat
-   (propertize "➜" 'face
-               `(:foreground
-                 ,(if (zerop (eshell-git-prompt-last-command-status))
-                      "green" "red")))
+   (with-face "➜"
+     :foreground (if (zerop (eshell-git-prompt-last-command-status))
+                     "green" "red"))
    " "
-   (propertize (eshell-git-prompt--shorten-directory-name)
-               'face '(:foreground "cyan"))
-   ;; Yo, we are in a Git repo, display some information about it
+   (with-face (eshell-git-prompt--shorten-directory-name)
+     :foreground "cyan")
+   ;; When in Git repo
    (when (eshell-git-prompt--git-root-dir)
-     (setq eshell-git-prompt-branch-name
-           (eshell-git-prompt--branch-name))
+     (setq eshell-git-prompt-branch-name (eshell-git-prompt--branch-name))
      (concat
       " "
-      (propertize "git:(" 'face '(:foreground "blue"))
-      (propertize (eshell-git-prompt--readable-branch-name)
-                  'face '(:foreground "red"))
-      (propertize ")" 'face '(:foreground "blue"))
+      (with-face "git:(" :foreground "blue")
+      (with-face (eshell-git-prompt--readable-branch-name) :foreground "red")
+      (with-face ")" :foreground "blue")
+      ;; when the working directory is not clean
       (when (eshell-git-prompt--collect-status)
-        (concat
-         " "
-         (propertize "✗" 'face '(:foreground "yellow"))))))
+        (concat " " (with-face "✗" :foreground "yellow")))))
    ;; To make it possible to let `eshell-prompt-regexp' to match the full prompt
    (propertize "$" 'invisible t) " "))
 
@@ -259,13 +258,12 @@ It should be set as value of `eshell-prompt-function', at the same time,
 (defun eshell-git-prompt-git-radar ()
   "Eshell Git prompt inspired by git-radar."
   (concat
-   (propertize "➜" 'face
-               `(:foreground
-                 ,(if (zerop (eshell-git-prompt-last-command-status))
-                      "green" "red")))
+   (with-face "➜"
+     :foreground (if (zerop (eshell-git-prompt-last-command-status))
+                     "green" "red"))
    " "
-   (propertize (eshell-git-prompt--shorten-directory-name)
-               'face '(:foreground "cyan"))
+   (with-face (eshell-git-prompt--shorten-directory-name)
+     :foreground "cyan")
    ;; Yo, we are in a Git repo, display some information about it
    (when (eshell-git-prompt--git-root-dir)
      (setq eshell-git-prompt-branch-name
@@ -273,25 +271,33 @@ It should be set as value of `eshell-prompt-function', at the same time,
            eshell-git-prompt-remote-branch-name
            (eshell-git-prompt--remote-branch-name))
      (concat
-      (concat
-       " "
-       (propertize "git:(" 'face '(:foreground "dark gray"))
-       (propertize (eshell-git-prompt--readable-branch-name)
-                   'face '(:foreground "gray"))
-                                        ;
-       (when eshell-git-prompt-remote-branch-name
-         (let ((local-behind (eshell-git-prompt--commits-behind-of-remote))
-               (local-ahead (eshell-git-prompt--commits-ahead-of-remote)))
-           (cond ((and (> local-ahead 0) (> local-behind 0))
-                  (concat " " (number-to-string local-behind)
-                          (propertize "⇵" 'face '(:foreground "yellow")) (number-to-string local-ahead)))
-                 ((> local-behind 0)
-                  (concat " " (number-to-string local-behind) (propertize "↓" 'face '(:foreground "red"))))
-                 ((> local-ahead 0)
-                  (concat " " (number-to-string local-ahead) (propertize "↑" 'face '(:foreground "green")))))))
-       (propertize ")" 'face '(:foreground "dark gray"))
-       ;; TODO file status
-       )
+      " "
+      (with-face "git:(" :foreground "dark gray")
+
+      ;; Branch name
+      (with-face (eshell-git-prompt--readable-branch-name)
+        :foreground "gray")
+
+      ;; Local commits
+      (when eshell-git-prompt-remote-branch-name
+        (let ((local-behind (eshell-git-prompt--commits-behind-of-remote))
+              (local-ahead (eshell-git-prompt--commits-ahead-of-remote)))
+          (cond ((and (> local-ahead 0) (> local-behind 0))
+                 (concat " "
+                         (number-to-string local-behind)
+                         (with-face "⇵" :foreground "yellow")
+                         (number-to-string local-ahead)))
+                ((> local-behind 0)
+                 (concat " "
+                         (number-to-string local-behind)
+                         (with-face "↓" :foreground "red")))
+                ((> local-ahead 0)
+                 (concat " "
+                         (number-to-string local-ahead)
+                         (with-face "↑" :foreground "green"))))))
+
+      (with-face ")" :foreground "dark gray")
+      ;; TODO file status
       ))
    ;; To make it possible to let `eshell-prompt-regexp' to match the full prompt
    (propertize "$" 'invisible t) " "))
