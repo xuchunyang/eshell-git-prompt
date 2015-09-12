@@ -334,4 +334,7 @@ It looks like:
 
 (provide 'eshell-git-prompt)
 
+;; Local Variables:
+;; eval: (when (require 'rainbow-mode nil t) (rainbow-mode 1))
+;; End:
 ;;; eshell-git-prompt.el ends here
