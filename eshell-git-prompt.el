@@ -96,7 +96,8 @@ You can add your own theme to this list, then run
 
 (cl-defun eshell-git-prompt--shorten-directory-name
     (&optional (directory default-directory))
-  "Return only current directory name. DIRECTORY must end with slash.
+  "Return only current directory name (without ending slash).
+DIRECTORY must end with slash.
 
 For example:
 
@@ -107,6 +108,12 @@ For example:
     (if (> (length dir) 1)
         (file-name-nondirectory (substring dir 0 -1))
       dir)))
+
+(defun eshell-git-prompt--slash-str (str)
+  "Make sure STR is ended with one slash, return it."
+  (if (string-suffix-p "/" str)
+      str
+    (concat str "/")))
 
 (defun eshell-git-prompt-last-command-status ()
   "Return Eshell last command execution status.
@@ -164,6 +171,7 @@ If working directory is clean, return nil."
           ("??" (cl-incf untracked))
           ("MM" (progn (cl-incf modified)
                        (cl-incf modified-updated)))
+          (" M" (cl-incf modified))
           ("A " (cl-incf new-added))
           (" D" (cl-incf deleted))
           ("D " (cl-incf deleted-updated))
@@ -300,8 +308,40 @@ It looks like:
                          (with-face "↑" :foreground "LimeGreen"))))))
 
       (with-face ")" :foreground "dark gray")
-      ;; TODO file status
-      ))
+
+      ;; File status
+      (-when-let (git-status (eshell-git-prompt--collect-status))
+        (-let [(&plist :untracked untracked
+                       :new-added new-added
+                       :modified-updated modified-updated
+                       :modified modified)
+               git-status]
+          (concat
+           ;; Updated to index changes
+           (let (group1)
+             (setq group1
+                   (concat
+                    (when (> new-added 0)
+                      (concat
+                       (with-face (number-to-string new-added)
+                         :foreground "white")
+                       (with-face "A" :foreground "green")))
+                    (when (> modified-updated 0)
+                      (concat
+                       (with-face (number-to-string modified-updated)
+                         :foreground "white")
+                       (with-face "M" :foreground "green")))))
+             (when (> (length group1) 0)
+               (concat " " group1)))
+           ;; Modified but not updated
+           (when (> modified 0)
+             (concat " " (with-face (number-to-string modified)
+                           :foreground "white")
+                     (with-face "M" :foreground "red")))
+           ;; Untracked file
+           (when (> untracked 0)
+             (with-face (format " %dA" untracked)
+               :foreground "white")))))))
    ;; To make it possible to let `eshell-prompt-regexp' to match the full prompt
    (propertize "$" 'invisible t) " "))
 
