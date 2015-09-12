@@ -33,13 +33,7 @@
 ;;   (eshell-git-prompt-use-theme 'robbyrussell)
 ;;
 ;; TODO
-;; - [ ] Try the built-in package `ansi-color'
-;; - [ ] Acquire more meta data like [[https://github.com/michaeldfallen/git-radar][michaeldfallen/git-radar]]
-;; - [ ] Tweak faces
-;; - [ ] Add one or two themes
-;; - [ ] How to add more extra themes?
-;; - [ ] Make accessing basic meta data more easier, for example, shorten
-;;       function name
+;; - [ ] Test with Emacs 24.5 and in text-base Emacs
 ;;
 ;; Note
 ;; 1 You must kill all Eshell buffers and re-enter Eshell to make your new
