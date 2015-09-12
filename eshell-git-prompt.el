@@ -284,17 +284,20 @@ It looks like:
               (local-ahead (eshell-git-prompt--commits-ahead-of-remote)))
           (cond ((and (> local-ahead 0) (> local-behind 0))
                  (concat " "
-                         (number-to-string local-behind)
+                         (with-face (number-to-string local-behind)
+                           :foreground "white")
                          (with-face "⇵" :foreground "yellow")
                          (number-to-string local-ahead)))
                 ((> local-behind 0)
                  (concat " "
-                         (number-to-string local-behind)
+                         (with-face (number-to-string local-behind)
+                           :foreground "white")
                          (with-face "↓" :foreground "red")))
                 ((> local-ahead 0)
                  (concat " "
-                         (number-to-string local-ahead)
-                         (with-face "↑" :foreground "green"))))))
+                         (with-face (number-to-string local-ahead)
+                           :foreground "white")
+                         (with-face "↑" :foreground "LimeGreen"))))))
 
       (with-face ")" :foreground "dark gray")
       ;; TODO file status
