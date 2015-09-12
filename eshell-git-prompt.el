@@ -289,19 +289,16 @@ It looks like:
               (local-ahead (eshell-git-prompt--commits-ahead-of-remote)))
           (cond ((and (> local-ahead 0) (> local-behind 0))
                  (concat " "
-                         (with-face (number-to-string local-behind)
-                           :foreground "white")
+                         (number-to-string local-behind)
                          (with-face "⇵" :foreground "yellow")
                          (number-to-string local-ahead)))
                 ((> local-behind 0)
                  (concat " "
-                         (with-face (number-to-string local-behind)
-                           :foreground "white")
+                         (number-to-string local-behind)
                          (with-face "↓" :foreground "red")))
                 ((> local-ahead 0)
                  (concat " "
-                         (with-face (number-to-string local-ahead)
-                           :foreground "white")
+                         (number-to-string local-ahead)
                          (with-face "↑" :foreground "LimeGreen"))))))
 
       (with-face ")" :foreground "dark gray")
@@ -320,25 +317,22 @@ It looks like:
                    (concat
                     (when (> new-added 0)
                       (concat
-                       (with-face (number-to-string new-added)
-                         :foreground "white")
+                       (number-to-string new-added)
                        (with-face "A" :foreground "green")))
                     (when (> modified-updated 0)
                       (concat
-                       (with-face (number-to-string modified-updated)
-                         :foreground "white")
+                       (number-to-string modified-updated)
                        (with-face "M" :foreground "green")))))
              (when (> (length group1) 0)
                (concat " " group1)))
            ;; Modified but not updated
            (when (> modified 0)
-             (concat " " (with-face (number-to-string modified)
-                           :foreground "white")
+             (concat " " (number-to-string modified)
                      (with-face "M" :foreground "red")))
            ;; Untracked file
            (when (> untracked 0)
-             (with-face (format " %dA" untracked)
-               :foreground "white")))))))
+             (concat " " (number-to-string untracked)
+                     (with-face "A" :foreground "white"))))))))
    ;; To make it possible to let `eshell-prompt-regexp' to match the full prompt
    (propertize "$" 'invisible t) " "))
 
