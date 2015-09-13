@@ -66,6 +66,9 @@
     (git-radar
      eshell-git-prompt-git-radar
      eshell-git-prompt-git-radar-regexp)
+    (powerline
+     eshell-git-prompt-powerline
+     eshell-git-prompt-powerline-regexp)
     (fish
      eshell-git-prompt-fish
      eshell-git-prompt-fish-regexp)
@@ -381,6 +384,52 @@ Adapted from http://www.emacswiki.org/emacs/EshellPrompt."
           " "))
 
 (defconst eshell-git-prompt-fish-regexp "^[^$\n]*\\\$ ")
+
+
+;; Powerline
+
+(defun eshell-git-prompt-powerline ()
+  (let ((segment-separator "\xe0b0")
+        (plusminus         "\x00b1")
+        (branch            "\xe0a0")
+        (detached          "\x27a6")
+        (cross             "\x2718")
+        dir git git-bg)
+    (setq dir
+          (with-face (concat
+                      " "
+                      (unless (= (eshell-git-prompt-last-command-status) 0)
+                        (concat cross " "))
+                      (abbreviate-file-name (eshell/pwd))
+                      " ")
+            :background "steel blue"))
+    (setq git
+          (when (eshell-git-prompt--git-root-dir)
+            (setq git-bg
+                  (if (eshell-git-prompt--collect-status)
+                      "indian red" "forest green"))
+            (setq eshell-git-prompt-branch-name (eshell-git-prompt--branch-name))
+            (with-face
+                (concat " "
+                        (-if-let (branch-name eshell-git-prompt-branch-name)
+                            (concat branch " " branch-name)
+                          (concat detached " "(eshell-git-prompt--commit-short-sha)))
+                        " ")
+              :background git-bg)))
+    (concat
+     (if git
+         (concat dir
+                 (with-face segment-separator
+                   :background git-bg
+                   :foreground "steel blue")
+                 git
+                 (with-face segment-separator
+                   :foreground git-bg))
+       (concat dir (with-face segment-separator
+                     :foreground "steel blue")))
+     (propertize "$" 'invisible t) " ")))
+
+(defconst eshell-git-prompt-powerline-regexp "^[^$\n]*\\\$ ")
 
 (defvar eshell-git-prompt-current-theme nil)
 
