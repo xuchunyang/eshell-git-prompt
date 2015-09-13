@@ -452,7 +452,7 @@ Adapted from http://www.emacswiki.org/emacs/EshellPrompt."
   "Pick up a Eshell prompt theme from `eshell-git-prompt-themes' to use."
   (interactive
    (let ((theme
-          (completing-read "Use theme:"
+          (completing-read "Use theme: "
                            (--map (symbol-name (car it))
                                   eshell-git-prompt-themes)
                            nil t)))
