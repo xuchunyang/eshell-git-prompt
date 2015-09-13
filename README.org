@@ -1,0 +1,23 @@
+* eshell-git-prompt
+
+** Usage
+
+Type =M-x eshell-git-prompt-use-theme= to pick up a theme.
+
+** Themes
+
+[[https://github.com/robbyrussell/oh-my-zsh/wiki/Themes#robbyrusse][oh-my-zsh's robbyrussell]]
+
+[[./img/eshell-git-prompt-robbyrussell.png]]
+
+[[https://github.com/michaeldfallen/git-radar][git-radar]]
+
+[[./img/eshell-git-prompt-git-radar.png]]
+
+Powerline
+
+[[./img/eshell-git-prompt-powerline.png]]
+
+Fish shell
+
+[[./img/eshell-git-prompt-fish.png]]

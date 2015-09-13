@@ -1,4 +1,4 @@
-;;; eshell-git-prompt.el --- An informative and fancy Eshell prompt for Git users  -*- lexical-binding: t; -*-
+;;; eshell-git-prompt.el --- Some Eshell prompt for Git users  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2015  Chunyang Xu
 
@@ -33,7 +33,9 @@
 ;;   (eshell-git-prompt-use-theme 'robbyrussell)
 ;;
 ;; TODO
-;; - [ ] Test with Emacs 24.5 and in text-base Emacs
+;; - [ ] For `eshell-prompt-regexp' hack, replace '$' with '' ('\x06')
+;; - [ ] Make it easier to make new theme (that is, improve API)
+;; - [ ] Test with recent version Emacs and in text-base Emacs
 ;;
 ;; Note
 ;; 1 You must kill all Eshell buffers and re-enter Eshell to make your new
@@ -85,6 +87,7 @@ You can add your own theme to this list, then run
 ;;; * Internal
 
 (defmacro with-face (str &rest properties)
+  "Add face PROPERTIES to STR."
   (declare (indent 1))
   `(propertize ,str 'face (list ,@properties)))
 
@@ -182,6 +185,7 @@ If working directory is clean, return nil."
           ("MM" (progn (cl-incf modified)
                        (cl-incf modified-updated)))
           (" M" (cl-incf modified))
+          ("M " (cl-incf modified-updated))
           ("A " (cl-incf new-added))
           (" D" (cl-incf deleted))
           ("D " (cl-incf deleted-updated))
@@ -386,7 +390,7 @@ Adapted from http://www.emacswiki.org/emacs/EshellPrompt."
           " "
           (when (eshell-git-prompt--git-root-dir)
             (setq eshell-git-prompt-branch-name (eshell-git-prompt--branch-name))
-            (concat (format "(%s)" eshell-git-prompt-branch-name)
+            (concat (format "(%s)" (eshell-git-prompt--readable-branch-name))
                     " "))
           (with-face "$"
             :foreground (unless (zerop (eshell-git-prompt-last-command-status))
