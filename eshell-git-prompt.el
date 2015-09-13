@@ -88,6 +88,16 @@ You can add your own theme to this list, then run
   (declare (indent 1))
   `(propertize ,str 'face (list ,@properties)))
 
+(defmacro eshell-git-prompt-str-append (str suffix)
+  "Append STR with SUFFIX and set the value of symbol STR to the result."
+  (if (symbolp str)
+      (list 'setq str (list 'concat str suffix))
+    (list 'cl-callf 'concat str suffix)))
+
+(defun eshell-git-prompt-str-join (strings separator)
+  "Join all the strings in STRINGS with SEPARATOR in between."
+  (mapconcat #'identity strings separator))
+
 (cl-defun eshell-git-prompt--git-root-dir
     (&optional (directory default-directory))
   "Return Git root directory name if exist, otherwise, return nil."
