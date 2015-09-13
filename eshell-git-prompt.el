@@ -364,7 +364,7 @@ Adapted from http://www.emacswiki.org/emacs/EshellPrompt."
                                  (string (elt (car components) 0) ?/)))))
             len (- len (1- (length (car components))))
             components (cdr components)))
-    (concat str (reduce (lambda (a b) (concat a "/" b)) components))))
+    (concat str (cl-reduce (lambda (a b) (concat a "/" b)) components))))
 
 ;; The default prompt of Fish shell <http://fishshell.com/>
 (defun eshell-git-prompt-fish ()
