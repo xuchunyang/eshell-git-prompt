@@ -433,6 +433,37 @@ It looks like:
            (symbol-name theme))))
     (user-error "Theme \"%s\" is not available" theme)))
 
+;;;###autoload
+(defun eshell/use-theme (&optional theme)
+  (if (null theme)
+      (progn
+        (eshell-printn "")
+        (eshell-printn "Available themes:")
+        (eshell-printn (make-string 50 ?-))
+        (eshell-printn
+         (mapconcat (lambda (theme)
+                      (format "%-20s%s"
+                              (symbol-name (car theme))
+                              (funcall (cadr theme))))
+                    eshell-git-prompt-themes "\n"))
+        (eshell-printn (make-string 50 ?-))
+        (eshell-printn ""))
+    (when (numberp theme)
+      (setq theme (number-to-string theme)))
+    (setq theme (intern theme))
+    (-if-let (func-regexp (assoc-default theme eshell-git-prompt-themes))
+        (progn
+          (setq eshell-prompt-function (symbol-function (car func-regexp))
+                eshell-prompt-regexp (symbol-value (cadr func-regexp)))
+          (setq eshell-git-prompt-current-theme theme))
+      (user-error
+       "Theme \"%s\" is not available.
+Run this command again without argument to view all available themes.
+
+usage: use-theme: (&optional theme)"
+       (symbol-name theme))))
+  nil)
+
 (provide 'eshell-git-prompt)
 
 ;; Local Variables:
