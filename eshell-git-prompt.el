@@ -4,7 +4,7 @@
 
 ;; Author: Chunyang Xu <xuchunyang56@gmail.com>
 ;; URL: https://github.com/xuchunyang/eshell-git-prompt
-;; Package-Requires: ((emacs "24.1") (dash "2.11.0"))
+;; Package-Requires: ((emacs "24.1") (dash "2.11.0") (s "1.9.0"))
 ;; Keywords: eshell git
 ;; Version: 0.1
 ;; Created: 09/11/2015
@@ -51,6 +51,7 @@
 
 (require 'cl-lib)
 (require 'dash)
+(require 's)
 
 (declare-function eshell/pwd "em-dirs")
 
@@ -96,10 +97,6 @@ You can add your own theme to this list, then run
   (if (symbolp str)
       (list 'setq str (list 'concat str suffix))
     (list 'cl-callf 'concat str suffix)))
-
-(defun eshell-git-prompt-str-join (strings separator)
-  "Join all the strings in STRINGS with SEPARATOR in between."
-  (mapconcat #'identity strings separator))
 
 (cl-defun eshell-git-prompt--git-root-dir
     (&optional (directory default-directory))
@@ -251,26 +248,39 @@ If working directory is clean, return nil."
 It looks like:
 
 ➜ eshell-git-prompt git:(master) ✗ git status "
-  (concat
-   (with-face "➜"
-     :foreground (if (zerop (eshell-git-prompt-last-command-status))
-                     "green" "red"))
-   " "
-   (with-face (eshell-git-prompt--shorten-directory-name)
-     :foreground "cyan")
-   ;; When in Git repo
-   (when (eshell-git-prompt--git-root-dir)
-     (setq eshell-git-prompt-branch-name (eshell-git-prompt--branch-name))
-     (concat
-      " "
-      (with-face "git:(" :foreground "blue")
-      (with-face (eshell-git-prompt--readable-branch-name) :foreground "red")
-      (with-face ")" :foreground "blue")
-      ;; when the working directory is not clean
-      (when (eshell-git-prompt--collect-status)
-        (concat " " (with-face "✗" :foreground "yellow")))))
-   ;; To make it possible to let `eshell-prompt-regexp' to match the full prompt
-   (propertize "$" 'invisible t) " "))
+  ;; Prompt components
+  (let (beg dir git-branch git-dirty end)
+    ;; Beg: start symbol
+    (setq beg
+          (with-face "➜"
+            :foreground (if (zerop (eshell-git-prompt-last-command-status))
+                            "green" "red")))
+
+    ;; Dir: current working directory
+    (setq dir (with-face (eshell-git-prompt--shorten-directory-name)
+                :foreground "cyan"))
+
+    ;; Git: branch/detached head, dirty status
+    (when (eshell-git-prompt--git-root-dir)
+      (setq eshell-git-prompt-branch-name (eshell-git-prompt--branch-name))
+
+      (setq git-branch
+            (concat
+             (with-face "git:(" :foreground "blue")
+             (with-face (eshell-git-prompt--readable-branch-name) :foreground "red")
+             (with-face ")" :foreground "blue")))
+
+      (setq git-dirty
+            (when (eshell-git-prompt--collect-status)
+              (with-face "✗" :foreground "yellow"))))
+
+    ;; End: To make it possible to let `eshell-prompt-regexp' to match the full prompt
+    (setq end (propertize "$" 'invisible t))
+
+    ;; Build prompt
+    (concat (s-join " " (-non-nil (list beg dir git-branch git-dirty)))
+            end
+            " ")))
 
 (defconst eshell-git-prompt-robbyrussell-regexp "^[^$\n]*\\\$ ")
 
