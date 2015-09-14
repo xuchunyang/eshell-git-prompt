@@ -72,9 +72,6 @@
     (powerline
      eshell-git-prompt-powerline
      eshell-git-prompt-powerline-regexp)
-    (fish
-     eshell-git-prompt-fish
-     eshell-git-prompt-fish-regexp)
     (default
       eshell-git-prompt-default-func
       eshell-git-prompt-default-regexp))
@@ -364,50 +361,6 @@ It looks like:
    (propertize "$" 'invisible t) " "))
 
 (defconst eshell-git-prompt-git-radar-regexp "^[^$\n]*\\\$ ")
-
-(defun eshell-git-prompt--fish-path (path)
-  "Return a potentially trimmed-down version of the directory PATH, replacing
-parent directories with their initial characters.
-
-For example.
-  ~/Projects/AppList/AppList.xcodeproj => ~/P/A/AppList.xcodeproj
-  ~/.emacs.d/lisp => ~/.e/lisp
-
-Adapted from http://www.emacswiki.org/emacs/EshellPrompt."
-  (let* ((components (split-string (abbreviate-file-name path) "/"))
-         (len (+ (1- (length components))
-                 (cl-reduce '+ components :key 'length)))
-         (str ""))
-    (while (cdr components)
-      (setq str (concat str
-                        (cond ((= 0 (length (car components))) "/")
-                              ((= 1 (length (car components)))
-                               (concat (car components) "/"))
-                              (t
-                               (if (string= "."
-                                            (string (elt (car components) 0)))
-                                   (concat (substring (car components) 0 2)
-                                           "/")
-                                 (string (elt (car components) 0) ?/)))))
-            len (- len (1- (length (car components))))
-            components (cdr components)))
-    (concat str (cl-reduce (lambda (a b) (concat a "/" b)) components))))
-
-;; The default prompt of Fish shell <http://fishshell.com/>
-(defun eshell-git-prompt-fish ()
-  (concat (with-face (eshell-git-prompt--fish-path (eshell/pwd))
-            :foreground "#7B9A53")
-          " "
-          (when (eshell-git-prompt--git-root-dir)
-            (setq eshell-git-prompt-branch-name (eshell-git-prompt--branch-name))
-            (concat (format "(%s)" (eshell-git-prompt--readable-branch-name))
-                    " "))
-          (with-face "$"
-            :foreground (unless (zerop (eshell-git-prompt-last-command-status))
-                          "red"))
-          " "))
-
-(defconst eshell-git-prompt-fish-regexp "^[^$\n]*\\\$ ")
 
 
 ;; Powerline
