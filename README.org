@@ -17,7 +17,3 @@ Type =M-x eshell-git-prompt-use-theme= to pick up a theme.
 Powerline
 
 [[./img/eshell-git-prompt-powerline.png]]
-
-Fish shell
-
-[[./img/eshell-git-prompt-fish.png]]
