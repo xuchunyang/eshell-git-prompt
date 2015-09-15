@@ -435,6 +435,7 @@ It looks like:
 
 ;;;###autoload
 (defun eshell/use-theme (&optional theme)
+  "List all available themes and pick one from Eshell."
   (if (null theme)
       (progn
         (eshell-printn "")
