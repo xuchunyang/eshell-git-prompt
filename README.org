@@ -1,4 +1,4 @@
-* eshell-git-prompt
+* eshell-git-prompt [[http://melpa.org/#/eshell-git-prompt][http://melpa.org/packages/eshell-git-prompt-badge.svg]]
 
 ** Usage
 
