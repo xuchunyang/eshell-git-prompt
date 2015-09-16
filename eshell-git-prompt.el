@@ -130,6 +130,14 @@ return 0 (i.e., success)."
       0
     eshell-last-command-status))
 
+(defun eshell-git-prompt-exit-success-p ()
+  "Replacement of `eshell-exit-success-p'.
+Should return nil only if a external command fails, otherwise return non-nil.
+
+It is unable to distinguish if a elisp command fails in practice, for example,
+`eshell/cd' return nil whether it successes or not."
+  (= (eshell-git-prompt-last-command-status) 0))
+
 (defconst eshell-git-prompt---git-global-arguments
   '("--no-pager" "--literal-pathspecs" "-c" "core.preloadindex=true")
   "Global git arguments.")
@@ -250,7 +258,7 @@ It looks like:
     ;; Beg: start symbol
     (setq beg
           (with-face "➜"
-            :foreground (if (zerop (eshell-git-prompt-last-command-status))
+            :foreground (if (eshell-git-prompt-exit-success-p)
                             "green" "red")))
 
     ;; Dir: current working directory
@@ -288,7 +296,7 @@ It looks like:
   "Eshell Git prompt inspired by git-radar."
   (concat
    (with-face "➜"
-     :foreground (if (zerop (eshell-git-prompt-last-command-status))
+     :foreground (if (eshell-git-prompt-exit-success-p)
                      "green" "red"))
    " "
    (with-face (eshell-git-prompt--shorten-directory-name)
@@ -375,7 +383,7 @@ It looks like:
     (setq dir
           (with-face (concat
                       " "
-                      (unless (= (eshell-git-prompt-last-command-status) 0)
+                      (unless (eshell-git-prompt-exit-success-p)
                         (concat cross " "))
                       (abbreviate-file-name (eshell/pwd))
                       " ")
