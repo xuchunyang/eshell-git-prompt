@@ -122,13 +122,12 @@ For example:
       str
     (concat str "/")))
 
-(defun eshell-git-prompt-last-command-status ()
-  "Return Eshell last command execution status.
-When Eshell just launches, `eshell-last-command-status' is not defined yet,
-return 0 (i.e., success)."
-  (if (not (boundp 'eshell-last-command-status))
-      0
-    eshell-last-command-status))
+(defun eshell-git-prompt-exit-success-p ()
+  "Wrapper of `eshell-exit-success-p' for handle first time run."
+  (if (not (and (boundp 'eshell-last-command-name)
+                (stringp eshell-last-command-name)))
+      t
+    (eshell-exit-success-p)))
 
 (defconst eshell-git-prompt---git-global-arguments
   '("--no-pager" "--literal-pathspecs" "-c" "core.preloadindex=true")
@@ -250,7 +249,7 @@ It looks like:
     ;; Beg: start symbol
     (setq beg
           (with-face "➜"
-            :foreground (if (zerop (eshell-git-prompt-last-command-status))
+            :foreground (if (eshell-git-prompt-exit-success-p)
                             "green" "red")))
 
     ;; Dir: current working directory
@@ -288,7 +287,7 @@ It looks like:
   "Eshell Git prompt inspired by git-radar."
   (concat
    (with-face "➜"
-     :foreground (if (zerop (eshell-git-prompt-last-command-status))
+     :foreground (if (eshell-git-prompt-exit-success-p)
                      "green" "red"))
    " "
    (with-face (eshell-git-prompt--shorten-directory-name)
@@ -375,7 +374,7 @@ It looks like:
     (setq dir
           (with-face (concat
                       " "
-                      (unless (= (eshell-git-prompt-last-command-status) 0)
+                      (unless (eshell-git-prompt-exit-success-p)
                         (concat cross " "))
                       (abbreviate-file-name (eshell/pwd))
                       " ")
