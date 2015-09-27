@@ -477,5 +477,6 @@ usage: use-theme: (&optional theme)"
 
 ;; Local Variables:
 ;; eval: (when (require 'rainbow-mode nil t) (rainbow-mode 1))
+;; coding: utf-8
 ;; End:
 ;;; eshell-git-prompt.el ends here
