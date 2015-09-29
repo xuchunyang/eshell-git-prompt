@@ -447,15 +447,16 @@ It looks like:
   (if (null theme)
       (progn
         (eshell-printn "")
-        (eshell-printn "Available themes:")
-        (eshell-printn (make-string 50 ?-))
+        (eshell-printn (make-string 60 ?-))
+        (eshell-printn (format "%-20s%s" "Name" "Preview"))
+        (eshell-printn (make-string 60 ?-))
         (eshell-printn
          (mapconcat (lambda (theme)
                       (format "%-20s%s"
                               (symbol-name (car theme))
                               (funcall (cadr theme))))
                     eshell-git-prompt-themes "\n"))
-        (eshell-printn (make-string 50 ?-))
+        (eshell-printn (make-string 60 ?-))
         (eshell-printn ""))
     (when (numberp theme)
       (setq theme (number-to-string theme)))
