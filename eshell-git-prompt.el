@@ -439,7 +439,7 @@ It looks like:
           (message
            "Now kill all Eshell buffers and re-enter Eshell to use %s theme"
            (symbol-name theme))))
-    (user-error "Theme \"%s\" is not available" theme)))
+    (error "Theme \"%s\" is not available" theme)))
 
 ;;;###autoload
 (defun eshell/use-theme (&optional theme)
@@ -466,7 +466,7 @@ It looks like:
           (setq eshell-prompt-function (symbol-function (car func-regexp))
                 eshell-prompt-regexp (symbol-value (cadr func-regexp)))
           (setq eshell-git-prompt-current-theme theme))
-      (user-error
+      (error
        "Theme \"%s\" is not available.
 Run this command again without argument to view all available themes.
 
