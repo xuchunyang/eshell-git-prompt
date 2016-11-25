@@ -4,7 +4,7 @@
 
 ;; Author: Chunyang Xu <mail@xuchunyang.me>
 ;; URL: https://github.com/xuchunyang/eshell-git-prompt
-;; Package-Requires: ((emacs "24.1") (cl-lib "0.5") (dash "2.11.0") (s "1.9.0"))
+;; Package-Requires: ((emacs "24.1") (cl-lib "0.5") (dash "2.11.0"))
 ;; Keywords: eshell git
 ;; Version: 0.1
 ;; Created: 09/11/2015
@@ -51,7 +51,6 @@
 
 (require 'cl-lib)
 (require 'dash)
-(require 's)
 
 (declare-function eshell/pwd "em-dirs")
 
@@ -283,7 +282,7 @@ It looks like:
     (setq end (propertize "$" 'invisible t))
 
     ;; Build prompt
-    (concat (s-join " " (-non-nil (list beg dir git-branch git-dirty)))
+    (concat (mapconcat #'identity (-non-nil (list beg dir git-branch git-dirty)) " ")
             end
             " ")))
 
