@@ -1,8 +1,8 @@
 ;;; eshell-git-prompt.el --- Some Eshell prompt for Git users  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2015  Chunyang Xu
+;; Copyright (C) 2015-2016  Chunyang Xu
 
-;; Author: Chunyang Xu <xuchunyang56@gmail.com>
+;; Author: Chunyang Xu <mail@xuchunyang.me>
 ;; URL: https://github.com/xuchunyang/eshell-git-prompt
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5") (dash "2.11.0") (s "1.9.0"))
 ;; Keywords: eshell git
@@ -477,7 +477,6 @@ usage: use-theme: (&optional theme)"
 (provide 'eshell-git-prompt)
 
 ;; Local Variables:
-;; eval: (when (require 'rainbow-mode nil t) (rainbow-mode 1))
 ;; coding: utf-8
 ;; End:
 ;;; eshell-git-prompt.el ends here
