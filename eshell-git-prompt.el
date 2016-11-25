@@ -52,7 +52,8 @@
 (require 'cl-lib)
 (require 'dash)
 
-(declare-function eshell/pwd "em-dirs")
+(declare-function eshell/pwd "em-dirs" (&rest args))
+(declare-function eshell-printn "esh-io" (object))
 
 (eval-when-compile
   (defvar eshell-last-command-status)
