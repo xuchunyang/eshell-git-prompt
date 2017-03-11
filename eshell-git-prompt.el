@@ -1,6 +1,6 @@
 ;;; eshell-git-prompt.el --- Some Eshell prompt for Git users  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2015-2016  Chunyang Xu
+;; Copyright (C) 2015-2017  Chunyang Xu
 
 ;; Author: Chunyang Xu <mail@xuchunyang.me>
 ;; URL: https://github.com/xuchunyang/eshell-git-prompt
@@ -72,6 +72,10 @@
     (powerline
      eshell-git-prompt-powerline
      eshell-git-prompt-powerline-regexp)
+    ;; Only a single $
+    (simple
+     eshell-git-prompt-simple
+     eshell-git-prompt-simple-regexp)
     (default
       eshell-git-prompt-default-func
       eshell-git-prompt-default-regexp))
@@ -237,6 +241,11 @@ If working directory is clean, return nil."
 
 
 ;;; * Themes
+
+(defun eshell-git-prompt-simple ()
+  (if (= (user-uid) 0) "# " "$ "))
+
+(defconst eshell-git-prompt-simple-regexp "^[#$] ")
 
 ;; the Eshell default prompt
 (defun eshell-git-prompt-default-func ()
