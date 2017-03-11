@@ -23,14 +23,15 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
+;; This package provides some themes of Emacs Shell (Eshell) prompt.
 ;;
 ;; Usage:
-;; You can call `eshell-git-prompt-use-theme' to pick up a theme then launch
-;; Eshell.
+;; In Eshell, type ~use-theme~ to list and preview available themes, then
+;; type ~use-theme name~ to choose a theme.
 ;;
-;; Add the following to your initialization file to let Eshell to use it every
-;; time:
-;;   (eshell-git-prompt-use-theme 'robbyrussell)
+;; You can also choose a theme in your init file by using
+;; ~eshell-git-prompt-use-theme~, then Eshell will use theme at the
+;; startup. For example, put the following in you init file
 ;;
 ;; TODO
 ;; - [ ] For `eshell-prompt-regexp' hack, replace '$' with '' ('\x06')
@@ -450,6 +451,8 @@ It looks like:
            (symbol-name theme))))
     (error "Theme \"%s\" is not available" theme)))
 
+;; TODO: Support the --help option
+;; TODO: Support completing (via pcomplete)
 ;;;###autoload
 (defun eshell/use-theme (&optional theme)
   "List all available themes and pick one from Eshell."
@@ -466,7 +469,8 @@ It looks like:
                               (funcall (cadr theme))))
                     eshell-git-prompt-themes "\n"))
         (eshell-printn (make-string 60 ?-))
-        (eshell-printn ""))
+        (eshell-printn "")
+        (eshell-printn "Type 'use-theme theme-name' to use a theme."))
     (when (numberp theme)
       (setq theme (number-to-string theme)))
     (setq theme (intern theme))
@@ -474,7 +478,8 @@ It looks like:
         (progn
           (setq eshell-prompt-function (symbol-function (car func-regexp))
                 eshell-prompt-regexp (symbol-value (cadr func-regexp)))
-          (setq eshell-git-prompt-current-theme theme))
+          (setq eshell-git-prompt-current-theme theme)
+          (eshell-printn ""))
       (error
        "Theme \"%s\" is not available.
 Run this command again without argument to view all available themes.

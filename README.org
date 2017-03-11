@@ -1,19 +1,26 @@
 * eshell-git-prompt [[https://melpa.org/#/eshell-git-prompt][https://melpa.org/packages/eshell-git-prompt-badge.svg]] [[https://stable.melpa.org/#/eshell-git-prompt][https://stable.melpa.org/packages/eshell-git-prompt-badge.svg]]
 
+This package provides some themes of Emacs Shell (Eshell) prompt.
+
 ** Usage
 
-Type =M-x eshell-git-prompt-use-theme= to pick up a theme.
+In Eshell, type ~use-theme~ to list and preview available themes, then
+type ~use-theme name~ to choose a theme.
 
-** Themes
+[[./img/eshell-git-prompt-usage.png]]
 
-[[https://github.com/robbyrussell/oh-my-zsh/wiki/Themes#robbyrusse][oh-my-zsh's robbyrussell]]
+You can also choose a theme in your init file by using
+~eshell-git-prompt-use-theme~, then Eshell will use theme at the
+startup. For example, put the following in you init file
 
-[[./img/eshell-git-prompt-robbyrussell.png]]
+#+BEGIN_SRC emacs-lisp
+(eshell-git-prompt-use-theme 'powerline)
+#+END_SRC
 
-[[https://github.com/michaeldfallen/git-radar][git-radar]]
+** Recover
 
-[[./img/eshell-git-prompt-git-radar.png]]
+To recover the Eshell default prompt, type
 
-Powerline
-
-[[./img/eshell-git-prompt-powerline.png]]
+#+BEGIN_SRC shell
+$ use-theme default
+#+END_SRC
