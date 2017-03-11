@@ -29,7 +29,7 @@ $ use-theme default
 
 or ~M-x eshell-git-prompt-use-theme RET default RET~.
 
-** How does this package works?
+** How does this package work?
 
 You can customize Eshell's prompt via something like the following
 
