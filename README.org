@@ -19,8 +19,23 @@ startup. For example, put the following in you init file
 
 ** Recover
 
+(Just in case some theme breaks your Eshell)
+
 To recover the Eshell default prompt, type
 
 #+BEGIN_SRC shell
 $ use-theme default
 #+END_SRC
+
+or ~M-x eshell-git-prompt-use-theme RET default RET~.
+
+** How does this package works?
+
+You can customize Eshell's prompt via something like the following
+
+#+BEGIN_SRC emacs-lisp
+(setq eshell-prompt-function (lambda () "A simple prompt." "$ ")
+      eshell-prompt-regexp    "^$ ")
+#+END_SRC
+
+this package uses the same way.
