@@ -86,6 +86,21 @@ You can add your own theme to this list, then run
   :group 'eshell-prompt
   :type '(repeat (list symbol symbol symbol)))
 
+(defface eshell-git-prompt-powerline-dir-face
+  '((t :background "steel blue"))
+  "Face for directory name in eshell git prompt theme `powerline`"
+  :group 'eshell-faces)
+
+(defface eshell-git-prompt-powerline-clean-face
+  '((t :background "forest green"))
+  "Face for git branch (clean) in eshell git prompt theme `powerline`"
+  :group 'eshell-faces)
+
+(defface eshell-git-prompt-powerline-not-clean-face
+  '((t :background "indian red"))
+  "Face for git branch (not clean) in eshell git prompt theme `powerline`"
+  :group 'eshell-faces)
+
 
 ;;; * Internal
 
@@ -391,37 +406,40 @@ It looks like:
         (cross             "\x2718")
         dir git git-bg)
     (setq dir
-          (with-face (concat
-                      " "
-                      (unless (eshell-git-prompt-exit-success-p)
-                        (concat cross " "))
-                      (abbreviate-file-name (eshell/pwd))
-                      " ")
-            :background "steel blue"))
+          (propertize
+           (concat
+            " "
+            (unless (eshell-git-prompt-exit-success-p)
+              (concat cross " "))
+            (abbreviate-file-name (eshell/pwd))
+            " ")
+           'face 'eshell-git-prompt-powerline-dir-face))
     (setq git
           (when (eshell-git-prompt--git-root-dir)
-            (setq git-bg
+            (setq git-face
                   (if (eshell-git-prompt--collect-status)
-                      "indian red" "forest green"))
+                      'eshell-git-prompt-powerline-not-clean-face
+                    'eshell-git-prompt-powerline-clean-face))
             (setq eshell-git-prompt-branch-name (eshell-git-prompt--branch-name))
-            (with-face
+            (propertize
                 (concat " "
                         (-if-let (branch-name eshell-git-prompt-branch-name)
                             (concat branch " " branch-name)
                           (concat detached " "(eshell-git-prompt--commit-short-sha)))
                         " ")
-              :background git-bg)))
+              'face git-face)))
     (concat
      (if git
          (concat dir
                  (with-face segment-separator
-                   :background git-bg
-                   :foreground "steel blue")
+                   :foreground (face-background 'eshell-git-prompt-powerline-dir-face)
+                   :background (face-background git-face))
                  git
                  (with-face segment-separator
-                   :foreground git-bg))
-       (concat dir (with-face segment-separator
-                     :foreground "steel blue")))
+                   :foreground (face-background git-face)))
+       (concat dir
+               (with-face segment-separator
+                 :foreground (face-background 'eshell-git-prompt-powerline-dir-face))))
      (propertize "$" 'invisible t) " ")))
 
 (defconst eshell-git-prompt-powerline-regexp "^[^$\n]*\\\$ ")
