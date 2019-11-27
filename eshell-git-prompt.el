@@ -89,31 +89,37 @@ You can add your own theme to this list, then run
 (defface eshell-git-prompt-exit-success-face
   '((((class color) (background light)) :foreground "forest green")
     (((class color) (background  dark)) :foreground "green"))
+  "Face for the success char"
   :group 'eshell-faces)
 
 (defface eshell-git-prompt-exit-fail-face
   '((((class color) (background light)) :foreground "red")
     (((class color) (background  dark)) :foreground "red"))
+  "Face for the fail char"
   :group 'eshell-faces)
 
 (defface eshell-git-prompt-directory-face
   '((((class color) (background light)) :foreground "steel blue")
     (((class color) (background  dark)) :foreground "cyan"))
+  "Face for the directory"
   :group 'eshell-faces)
 
 (defface eshell-git-prompt-modified-face
   '((((class color) (background light)) :foreground "dark orange")
     (((class color) (background  dark)) :foreground "red"))
+  "Face for the git 'modified' char"
   :group 'eshell-faces)
 
 (defface eshell-git-prompt-add-face
   '((((class color) (background light)) :foreground "dim gray")
     (((class color) (background  dark)) :foreground "white"))
+  "Face for the git 'add' char"
   :group 'eshell-faces)
 
 (defface eshell-git-prompt-branch-face
   '((((class color) (background light)) :foreground "dim gray")
     (((class color) (background  dark)) :foreground "dark gray"))
+  "Face for the git branch"
   :group 'eshell-faces)
 
 (defface eshell-git-prompt-powerline-dir-face
