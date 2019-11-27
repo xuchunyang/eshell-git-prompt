@@ -86,6 +86,36 @@ You can add your own theme to this list, then run
   :group 'eshell-prompt
   :type '(repeat (list symbol symbol symbol)))
 
+(defface eshell-git-prompt-exit-success-face
+  '((((class color) (background light)) :foreground "forest green")
+    (((class color) (background  dark)) :foreground "green"))
+  :group 'eshell-faces)
+
+(defface eshell-git-prompt-exit-fail-face
+  '((((class color) (background light)) :foreground "red")
+    (((class color) (background  dark)) :foreground "red"))
+  :group 'eshell-faces)
+
+(defface eshell-git-prompt-directory-face
+  '((((class color) (background light)) :foreground "steel blue")
+    (((class color) (background  dark)) :foreground "cyan"))
+  :group 'eshell-faces)
+
+(defface eshell-git-prompt-modified-face
+  '((((class color) (background light)) :foreground "dark orange")
+    (((class color) (background  dark)) :foreground "red"))
+  :group 'eshell-faces)
+
+(defface eshell-git-prompt-add-face
+  '((((class color) (background light)) :foreground "dim gray")
+    (((class color) (background  dark)) :foreground "white"))
+  :group 'eshell-faces)
+
+(defface eshell-git-prompt-branch-face
+  '((((class color) (background light)) :foreground "dim gray")
+    (((class color) (background  dark)) :foreground "dark gray"))
+  :group 'eshell-faces)
+
 (defface eshell-git-prompt-powerline-dir-face
   '((t :background "steel blue"))
   "Face for directory name in eshell git prompt theme `powerline`"
@@ -321,11 +351,11 @@ It looks like:
   "Eshell Git prompt inspired by git-radar."
   (concat
    (with-face "➜"
-     :foreground (if (eshell-git-prompt-exit-success-p)
-                     "green" "red"))
+     (if (eshell-git-prompt-exit-success-p)
+         'eshell-git-prompt-exit-success-face 'eshell-git-prompt-exit-fail-face))
    " "
    (with-face (eshell-git-prompt--shorten-directory-name)
-     :foreground "cyan")
+     'eshell-git-prompt-directory-face)
    ;; Yo, we are in a Git repo, display some information about it
    (when (eshell-git-prompt--git-root-dir)
      (setq eshell-git-prompt-branch-name
@@ -334,11 +364,11 @@ It looks like:
            (eshell-git-prompt--remote-branch-name))
      (concat
       " "
-      (with-face "git:(" :foreground "dark gray")
+      (with-face "git:(" 'eshell-git-prompt-branch-face)
 
       ;; Branch name
       (with-face (eshell-git-prompt--readable-branch-name)
-        :foreground "gray")
+        'eshell-git-prompt-branch-face)
 
       ;; Local commits
       (when eshell-git-prompt-remote-branch-name
@@ -358,7 +388,7 @@ It looks like:
                          (number-to-string local-ahead)
                          (with-face "↑" :foreground "LimeGreen"))))))
 
-      (with-face ")" :foreground "dark gray")
+      (with-face ")" 'eshell-git-prompt-branch-face)
 
       ;; File status
       (-when-let (git-status (eshell-git-prompt--collect-status))
@@ -375,21 +405,21 @@ It looks like:
                     (when (> new-added 0)
                       (concat
                        (number-to-string new-added)
-                       (with-face "A" :foreground "green")))
+                       (with-face "A" 'eshell-git-prompt-add-face)))
                     (when (> modified-updated 0)
                       (concat
                        (number-to-string modified-updated)
-                       (with-face "M" :foreground "green")))))
+                       (with-face "M" 'eshell-git-prompt-modified-face)))))
              (when (> (length group1) 0)
                (concat " " group1)))
            ;; Modified but not updated
            (when (> modified 0)
              (concat " " (number-to-string modified)
-                     (with-face "M" :foreground "red")))
+                     (with-face "M" 'eshell-git-prompt-modified-face)))
            ;; Untracked file
            (when (> untracked 0)
              (concat " " (number-to-string untracked)
-                     (with-face "A" :foreground "white"))))))))
+                     (with-face "A" 'eshell-git-prompt-add-face))))))))
    ;; To make it possible to let `eshell-prompt-regexp' to match the full prompt
    (propertize "$" 'invisible t) " "))
 
