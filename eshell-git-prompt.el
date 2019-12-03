@@ -122,6 +122,24 @@ You can add your own theme to this list, then run
   "Face for the git branch"
   :group 'eshell-faces)
 
+(defface eshell-git-prompt-robyrussell-git-face
+  '((((class color) (background light)) :foreground "blue")
+    (((class color) (background  dark)) :foreground "blue"))
+  "Face for the git indicator"
+  :group 'eshell-faces)
+
+(defface eshell-git-prompt-robyrussell-branch-face
+  '((((class color) (background light)) :foreground "red")
+    (((class color) (background  dark)) :foreground "red"))
+  "Face for the git branch"
+  :group 'eshell-faces)
+
+(defface eshell-git-prompt-robyrussell-git-dirty-face
+  '((((class color) (background light)) :foreground "dark orange")
+    (((class color) (background  dark)) :foreground "yellow"))
+  "Face for the git dirty"
+  :group 'eshell-faces)
+
 (defface eshell-git-prompt-powerline-dir-face
   '((t :background "steel blue"))
   "Face for directory name in eshell git prompt theme `powerline`"
@@ -318,13 +336,12 @@ It looks like:
   (let (beg dir git-branch git-dirty end)
     ;; Beg: start symbol
     (setq beg
-          (with-face "➜"
-            :foreground (if (eshell-git-prompt-exit-success-p)
-                            "green" "red")))
+          (with-face "➜" (if (eshell-git-prompt-exit-success-p)
+                            'eshell-git-prompt-exit-success-face 'eshell-git-prompt-exit-fail-face)))
 
     ;; Dir: current working directory
     (setq dir (with-face (eshell-git-prompt--shorten-directory-name)
-                :foreground "cyan"))
+                'eshell-git-prompt-directory-face))
 
     ;; Git: branch/detached head, dirty status
     (when (eshell-git-prompt--git-root-dir)
@@ -332,13 +349,13 @@ It looks like:
 
       (setq git-branch
             (concat
-             (with-face "git:(" :foreground "blue")
-             (with-face (eshell-git-prompt--readable-branch-name) :foreground "red")
-             (with-face ")" :foreground "blue")))
+             (with-face "git:(" 'eshell-git-prompt-robyrussell-git-face)
+             (with-face (eshell-git-prompt--readable-branch-name) 'eshell-git-prompt-robyrussell-branch-face)
+             (with-face ")" 'eshell-git-prompt-robyrussell-git-face)))
 
       (setq git-dirty
             (when (eshell-git-prompt--collect-status)
-              (with-face "✗" :foreground "yellow"))))
+              (with-face "✗" 'eshell-git-prompt-robyrussell-git-dirty-face))))
 
     ;; End: To make it possible to let `eshell-prompt-regexp' to match the full prompt
     (setq end (propertize "$" 'invisible t))
