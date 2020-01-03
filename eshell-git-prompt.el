@@ -451,6 +451,10 @@ It looks like:
 
 ;; Powerline
 
+;; For https://github.com/xuchunyang/eshell-git-prompt/issues/8
+(defun eshell-git-prompt-powerline-dir ()
+  (abbreviate-file-name (eshell/pwd)))
+
 (defun eshell-git-prompt-powerline ()
   (let ((segment-separator "\xe0b0")
         (plusminus         "\x00b1")
@@ -464,7 +468,7 @@ It looks like:
             " "
             (unless (eshell-git-prompt-exit-success-p)
               (concat cross " "))
-            (abbreviate-file-name (eshell/pwd))
+            (eshell-git-prompt-powerline-dir)
             " ")
            'face 'eshell-git-prompt-powerline-dir-face))
     (setq git
