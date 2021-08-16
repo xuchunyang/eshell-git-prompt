@@ -165,7 +165,8 @@ You can add your own theme to this list, then run
   :group 'eshell-faces)
 
 (defface eshell-git-prompt-multiline-command-face
-  '((t :foreground "gold3"))
+  '((((class color) (background light)) :foreground "slate blue")
+    (((class color) (background  dark)) :foreground "gold"))
   "Face for command user typed in eshell git prompt theme `multiline`."
   :group 'eshell-faces)
 
@@ -546,7 +547,7 @@ It looks like:
     ;; Build prompt
     (concat hr dir separator git git-dirty separator time sign command)))
 
-(defconst eshell-git-prompt-multiline-regexp "^[^λ\n]*λ ")
+(defconst eshell-git-prompt-multiline-regexp "^[^$\n]*λ ")
 
 (defvar eshell-git-prompt-current-theme nil)
 
