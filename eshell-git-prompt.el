@@ -159,13 +159,19 @@ You can add your own theme to this list, then run
   :group 'eshell-faces)
 
 (defface eshell-git-prompt-multiline-secondary-face
-  '((t :foreground "dim gray"))
+  '((((class color) (background light)) :foreground "light gray")
+    (((class color) (background  dark)) :foreground "dim gray"))
   "Face for secondary part in eshell git prompt theme `multiline`. e.g. separator, horizontal line, date."
   :group 'eshell-faces)
 
 (defface eshell-git-prompt-multiline-command-face
-  '((t :foreground "gold1"))
+  '((t :foreground "gold3"))
   "Face for command user typed in eshell git prompt theme `multiline`."
+  :group 'eshell-faces)
+
+(defface eshell-git-prompt-multiline-sign-face
+  '((t :foreground "deep pink"))
+  "Face for prompt sign in eshell git prompt theme `multiline`."
   :group 'eshell-faces)
 
 
@@ -533,8 +539,8 @@ It looks like:
     (setq time (with-face (format-time-string "%I:%M:%S %p") 'eshell-git-prompt-multiline-secondary-face))
     (setq sign
           (if (= (user-uid) 0)
-              "\n#"
-            "\nλ"))
+              (with-face "\n#" 'eshell-git-prompt-multiline-sign-face)
+            (with-face "\nλ" 'eshell-git-prompt-multiline-sign-face)))
     (setq command (with-face " " 'eshell-git-prompt-multiline-command-face))
 
     ;; Build prompt
