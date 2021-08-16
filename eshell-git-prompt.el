@@ -73,6 +73,9 @@
     (powerline
      eshell-git-prompt-powerline
      eshell-git-prompt-powerline-regexp)
+    (multiline
+     eshell-git-prompt-multiline
+     eshell-git-prompt-multiline-regexp)
     ;; Only a single $
     (simple
      eshell-git-prompt-simple
@@ -499,6 +502,32 @@ It looks like:
      (propertize "$" 'invisible t) " ")))
 
 (defconst eshell-git-prompt-powerline-regexp "^[^$\n]*\\\$ ")
+
+(defun eshell-git-prompt-multiline ()
+  (let (separator hr dir git time prompt git-dirty)
+    (setq separator (with-face " | " :foreground "DimGray"))
+    (setq hr (with-face (concat "\n" (make-string (/ (window-total-width) 2) ?─) "\n") :foreground "DimGray") )
+    (setq dir
+          (concat
+           (with-face "🗀" :foreground "cyan1")
+           (with-face (concat  (abbreviate-file-name (eshell/pwd))))))
+    (setq git
+          (concat (with-face "⎇" :foreground "SpringGreen1")
+                  (with-face (concat (eshell-git-prompt--branch-name)))))
+    (setq git-dirty
+          (when (eshell-git-prompt--branch-name)
+            (if (eshell-git-prompt--collect-status)
+                (with-face " ✗" 'eshell-git-prompt-robyrussell-git-dirty-face)
+              (with-face " ✔" :foreground "green"))))
+    (setq time (with-face (format-time-string "%I:%M:%S %p") :foreground "#5a5b7f"))
+    (setq prompt (if (= (user-uid) 0)
+                     (with-face "\n#" :foreground "red2")
+                   (with-face "\nλ" :foreground "DarkOliveGreen3")))
+    (setq command (with-face " " :foreground "gold1"))
+
+    (concat hr dir separator git git-dirty separator time prompt)))
+
+(defconst eshell-git-prompt-multiline-regexp "^[^λ\n]*λ ")
 
 (defvar eshell-git-prompt-current-theme nil)
 
