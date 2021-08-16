@@ -158,6 +158,16 @@ You can add your own theme to this list, then run
   "Face for git branch (not clean) in eshell git prompt theme `powerline`"
   :group 'eshell-faces)
 
+(defface eshell-git-prompt-multiline-secondary-face
+  '((t :foreground "dim gray"))
+  "Face for secondary part in eshell git prompt theme `multiline`. e.g. separator, horizontal line, date."
+  :group 'eshell-faces)
+
+(defface eshell-git-prompt-multiline-command-face
+  '((t :foreground "gold1"))
+  "Face for command user typed in eshell git prompt theme `multiline`."
+  :group 'eshell-faces)
+
 
 ;;; * Internal
 
@@ -504,28 +514,31 @@ It looks like:
 (defconst eshell-git-prompt-powerline-regexp "^[^$\n]*\\\$ ")
 
 (defun eshell-git-prompt-multiline ()
-  (let (separator hr dir git time prompt git-dirty)
-    (setq separator (with-face " | " :foreground "DimGray"))
-    (setq hr (with-face (concat "\n" (make-string (/ (window-total-width) 2) ?─) "\n") :foreground "DimGray") )
+  "Eshell Git prompt inspired by spaceship-prompt."
+  (let (separator hr dir git git-dirty time sign command)
+    (setq separator (with-face " | " 'eshell-git-prompt-multiline-secondary-face))
+    (setq hr (with-face (concat "\n" (make-string (/ (window-total-width) 2) ?─) "\n") 'eshell-git-prompt-multiline-secondary-face))
     (setq dir
           (concat
-           (with-face "🗀" :foreground "cyan1")
-           (with-face (concat  (abbreviate-file-name (eshell/pwd))))))
+           (with-face "🗀" 'eshell-git-prompt-directory-face)
+           (concat  (abbreviate-file-name (eshell/pwd)))))
     (setq git
-          (concat (with-face "⎇" :foreground "SpringGreen1")
-                  (with-face (concat (eshell-git-prompt--branch-name)))))
+          (concat (with-face "⎇" 'eshell-git-prompt-exit-success-face)
+                  (concat (eshell-git-prompt--branch-name))))
     (setq git-dirty
           (when (eshell-git-prompt--branch-name)
             (if (eshell-git-prompt--collect-status)
-                (with-face " ✗" 'eshell-git-prompt-robyrussell-git-dirty-face)
-              (with-face " ✔" :foreground "green"))))
-    (setq time (with-face (format-time-string "%I:%M:%S %p") :foreground "#5a5b7f"))
-    (setq prompt (if (= (user-uid) 0)
-                     (with-face "\n#" :foreground "red2")
-                   (with-face "\nλ" :foreground "DarkOliveGreen3")))
-    (setq command (with-face " " :foreground "gold1"))
+                (with-face " ✎" 'eshell-git-prompt-modified-face)
+              (with-face " ✔" 'eshell-git-prompt-exit-success-face))))
+    (setq time (with-face (format-time-string "%I:%M:%S %p") 'eshell-git-prompt-multiline-secondary-face))
+    (setq sign
+          (if (= (user-uid) 0)
+              "\n#"
+            "\nλ"))
+    (setq command (with-face " " 'eshell-git-prompt-multiline-command-face))
 
-    (concat hr dir separator git git-dirty separator time prompt)))
+    ;; Build prompt
+    (concat hr dir separator git git-dirty separator time sign command)))
 
 (defconst eshell-git-prompt-multiline-regexp "^[^λ\n]*λ ")
 
