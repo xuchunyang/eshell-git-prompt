@@ -203,6 +203,11 @@ You can add your own theme to this list, then run
   "Face for prompt sign in eshell git prompt theme `multiline`."
   :group 'eshell-faces)
 
+(defface eshell-git-prompt-multiline2-fail-face
+  '((t (:foreground "red" :weight ultra-bold)))
+  "Face for prompt sign in eshell git prompt theme `multiline`."
+  :group 'eshell-faces)
+
 (defface eshell-git-prompt-multiline2-command-face
   '((((class color) (background light)) (:foreground "slate blue" :weight ultra-bold))
     (((class color) (background  dark)) (:foreground "gold" :weight ultra-bold)))
@@ -605,12 +610,16 @@ It looks like:
 	     "")
 	   (when (eshell-git-prompt--branch-name)
 	     (if (eshell-git-prompt--collect-status)
-		 (with-face " ✎" 'eshell-git-prompt-modified-face)
+		 (with-face " ✗" 'eshell-git-prompt-modified-face)
 	       (with-face " ✔" 'eshell-git-prompt-exit-success-face)))))
     (setq time (with-face (format-time-string "%I:%M:%S %p")
 		 'eshell-git-prompt-multiline2-command-face))
     (setq sign
-          (with-face ")\n└─>>" 'eshell-git-prompt-multiline2-secondary-face))
+	  (concat
+	   (with-face ")\n└─" 'eshell-git-prompt-multiline2-secondary-face)
+	   (if (not (eshell-git-prompt-exit-success-p))
+	       (with-face ">>" 'eshell-git-prompt-multiline2-fail-face)
+             (with-face ">>" 'eshell-git-prompt-multiline2-secondary-face))))
     (setq command (with-face " " 'eshell-git-prompt-multiline2-command-face))
 
     ;; Build prompt
