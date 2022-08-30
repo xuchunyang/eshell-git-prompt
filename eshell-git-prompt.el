@@ -6,7 +6,7 @@
 ;; URL: https://github.com/xuchunyang/eshell-git-prompt
 ;; Package-Requires: ((emacs "24.1") (cl-lib "0.5") (dash "2.11.0"))
 ;; Keywords: eshell git
-;; Version: 0.1.2
+;; Version: 0.1.3
 ;; Created: 09/11/2015
 
 ;; This program is free software; you can redistribute it and/or modify
