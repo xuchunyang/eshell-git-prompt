@@ -222,6 +222,15 @@ You can add your own theme to this list, then run
   (declare (indent 1))
   `(propertize ,str 'face (list ,@properties)))
 
+(defun eshell-git-prompt---str-read-only (str)
+  "Make STR read-only and return the string."
+  (add-text-properties 0 (length str)
+		       '(read-only t
+		         front-sticky (read-only)
+		         rear-nonsticky (read-only))
+		       str)
+  str)
+
 (defmacro eshell-git-prompt-str-append (str suffix)
   "Append STR with SUFFIX and set the value of symbol STR to the result."
   (if (symbolp str)
@@ -372,14 +381,16 @@ If working directory is clean, return nil."
 ;;; * Themes
 
 (defun eshell-git-prompt-simple ()
-  (if (= (user-uid) 0) "# " "$ "))
+  (eshell-git-prompt---str-read-only
+   (if (= (user-uid) 0) "# " "$ ")))
 
 (defconst eshell-git-prompt-simple-regexp "^[#$] ")
 
 ;; the Eshell default prompt
 (defun eshell-git-prompt-default-func ()
-  (concat (abbreviate-file-name (eshell/pwd))
-          (if (= (user-uid) 0) " # " " $ ")))
+  (eshell-git-prompt---str-read-only
+   (concat (abbreviate-file-name (eshell/pwd))
+           (if (= (user-uid) 0) " # " " $ "))))
 
 (defconst eshell-git-prompt-default-regexp "^[^#$\n]* [#$] ")
 
@@ -420,9 +431,10 @@ It looks like:
     (setq end (propertize "$" 'invisible t))
 
     ;; Build prompt
-    (concat (mapconcat #'identity (-non-nil (list beg dir git-branch git-dirty)) " ")
-            end
-            " ")))
+    (eshell-git-prompt---str-read-only
+     (concat (mapconcat #'identity (-non-nil (list beg dir git-branch git-dirty)) " ")
+             end
+             " "))))
 
 (defconst eshell-git-prompt-robbyrussell-regexp "^[^$\n]*\\\$ ")
 
@@ -431,79 +443,80 @@ It looks like:
 
 (defun eshell-git-prompt-git-radar ()
   "Eshell Git prompt inspired by git-radar."
-  (concat
-   (with-face "➜"
-     (if (eshell-git-prompt-exit-success-p)
-         'eshell-git-prompt-exit-success-face 'eshell-git-prompt-exit-fail-face))
-   " "
-   (with-face (eshell-git-prompt--shorten-directory-name)
-     'eshell-git-prompt-directory-face)
-   ;; Yo, we are in a Git repo, display some information about it
-   (when (eshell-git-prompt--git-root-dir)
-     (setq eshell-git-prompt-branch-name
-           (eshell-git-prompt--branch-name)
-           eshell-git-prompt-remote-branch-name
-           (eshell-git-prompt--remote-branch-name))
-     (concat
-      " "
-      (with-face "git:(" 'eshell-git-prompt-branch-face)
+  (eshell-git-prompt---str-read-only
+   (concat
+    (with-face "➜"
+      (if (eshell-git-prompt-exit-success-p)
+          'eshell-git-prompt-exit-success-face 'eshell-git-prompt-exit-fail-face))
+    " "
+    (with-face (eshell-git-prompt--shorten-directory-name)
+      'eshell-git-prompt-directory-face)
+    ;; Yo, we are in a Git repo, display some information about it
+    (when (eshell-git-prompt--git-root-dir)
+      (setq eshell-git-prompt-branch-name
+            (eshell-git-prompt--branch-name)
+            eshell-git-prompt-remote-branch-name
+            (eshell-git-prompt--remote-branch-name))
+      (concat
+       " "
+       (with-face "git:(" 'eshell-git-prompt-branch-face)
 
-      ;; Branch name
-      (with-face (eshell-git-prompt--readable-branch-name)
-        'eshell-git-prompt-branch-face)
+       ;; Branch name
+       (with-face (eshell-git-prompt--readable-branch-name)
+         'eshell-git-prompt-branch-face)
 
-      ;; Local commits
-      (when eshell-git-prompt-remote-branch-name
-        (let ((local-behind (eshell-git-prompt--commits-behind-of-remote))
-              (local-ahead (eshell-git-prompt--commits-ahead-of-remote)))
-          (cond ((and (> local-ahead 0) (> local-behind 0))
-                 (concat " "
-                         (number-to-string local-behind)
-                         (with-face "⇵" :foreground "yellow")
-                         (number-to-string local-ahead)))
-                ((> local-behind 0)
-                 (concat " "
-                         (number-to-string local-behind)
-                         (with-face "↓" :foreground "red")))
-                ((> local-ahead 0)
-                 (concat " "
-                         (number-to-string local-ahead)
-                         (with-face "↑" :foreground "LimeGreen"))))))
+       ;; Local commits
+       (when eshell-git-prompt-remote-branch-name
+         (let ((local-behind (eshell-git-prompt--commits-behind-of-remote))
+               (local-ahead (eshell-git-prompt--commits-ahead-of-remote)))
+           (cond ((and (> local-ahead 0) (> local-behind 0))
+                  (concat " "
+                          (number-to-string local-behind)
+                          (with-face "⇵" :foreground "yellow")
+                          (number-to-string local-ahead)))
+                 ((> local-behind 0)
+                  (concat " "
+                          (number-to-string local-behind)
+                          (with-face "↓" :foreground "red")))
+                 ((> local-ahead 0)
+                  (concat " "
+                          (number-to-string local-ahead)
+                          (with-face "↑" :foreground "LimeGreen"))))))
 
-      (with-face ")" 'eshell-git-prompt-branch-face)
+       (with-face ")" 'eshell-git-prompt-branch-face)
 
-      ;; File status
-      (-when-let (git-status (eshell-git-prompt--collect-status))
-        (-let [(&plist :untracked untracked
-                       :new-added new-added
-                       :modified-updated modified-updated
-                       :modified modified)
-               git-status]
-          (concat
-           ;; Updated to index changes
-           (let (group1)
-             (setq group1
-                   (concat
-                    (when (> new-added 0)
-                      (concat
-                       (number-to-string new-added)
-                       (with-face "A" 'eshell-git-prompt-add-face)))
-                    (when (> modified-updated 0)
-                      (concat
-                       (number-to-string modified-updated)
-                       (with-face "M" 'eshell-git-prompt-modified-face)))))
-             (when (> (length group1) 0)
-               (concat " " group1)))
-           ;; Modified but not updated
-           (when (> modified 0)
-             (concat " " (number-to-string modified)
-                     (with-face "M" 'eshell-git-prompt-modified-face)))
-           ;; Untracked file
-           (when (> untracked 0)
-             (concat " " (number-to-string untracked)
-                     (with-face "A" 'eshell-git-prompt-add-face))))))))
-   ;; To make it possible to let `eshell-prompt-regexp' to match the full prompt
-   (propertize "$" 'invisible t) " "))
+       ;; File status
+       (-when-let (git-status (eshell-git-prompt--collect-status))
+         (-let [(&plist :untracked untracked
+                        :new-added new-added
+                        :modified-updated modified-updated
+                        :modified modified)
+                git-status]
+           (concat
+            ;; Updated to index changes
+            (let (group1)
+              (setq group1
+                    (concat
+                     (when (> new-added 0)
+                       (concat
+                        (number-to-string new-added)
+                        (with-face "A" 'eshell-git-prompt-add-face)))
+                     (when (> modified-updated 0)
+                       (concat
+                        (number-to-string modified-updated)
+                        (with-face "M" 'eshell-git-prompt-modified-face)))))
+              (when (> (length group1) 0)
+                (concat " " group1)))
+            ;; Modified but not updated
+            (when (> modified 0)
+              (concat " " (number-to-string modified)
+                      (with-face "M" 'eshell-git-prompt-modified-face)))
+            ;; Untracked file
+            (when (> untracked 0)
+              (concat " " (number-to-string untracked)
+                      (with-face "A" 'eshell-git-prompt-add-face))))))))
+    ;; To make it possible to let `eshell-prompt-regexp' to match the full prompt
+    (propertize "$" 'invisible t) " ")))
 
 (defconst eshell-git-prompt-git-radar-regexp "^[^$\n]*\\\$ ")
 
@@ -537,25 +550,26 @@ It looks like:
                     'eshell-git-prompt-powerline-clean-face))
             (setq eshell-git-prompt-branch-name (eshell-git-prompt--branch-name))
             (propertize
-                (concat " "
-                        (-if-let (branch-name eshell-git-prompt-branch-name)
-                            (concat branch " " branch-name)
-                          (concat detached " "(eshell-git-prompt--commit-short-sha)))
-                        " ")
-              'face git-face)))
-    (concat
-     (if git
-         (concat dir
-                 (with-face segment-separator
-                   :foreground (face-background 'eshell-git-prompt-powerline-dir-face)
-                   :background (face-background git-face))
-                 git
-                 (with-face segment-separator
-                   :foreground (face-background git-face)))
-       (concat dir
-               (with-face segment-separator
-                 :foreground (face-background 'eshell-git-prompt-powerline-dir-face))))
-     (propertize "$" 'invisible t) " ")))
+             (concat " "
+                     (-if-let (branch-name eshell-git-prompt-branch-name)
+                         (concat branch " " branch-name)
+                       (concat detached " "(eshell-git-prompt--commit-short-sha)))
+                     " ")
+             'face git-face)))
+    (eshell-git-prompt---str-read-only
+     (concat
+      (if git
+          (concat dir
+                  (with-face segment-separator
+                    :foreground (face-background 'eshell-git-prompt-powerline-dir-face)
+                    :background (face-background git-face))
+                  git
+                  (with-face segment-separator
+                    :foreground (face-background git-face)))
+        (concat dir
+                (with-face segment-separator
+                  :foreground (face-background 'eshell-git-prompt-powerline-dir-face))))
+      (propertize "$" 'invisible t) " "))))
 
 (defconst eshell-git-prompt-powerline-regexp "^[^$\n]*\\\$ ")
 
@@ -584,7 +598,8 @@ It looks like:
     (setq command (with-face " " 'eshell-git-prompt-multiline-command-face))
 
     ;; Build prompt
-    (concat hr dir separator git git-dirty separator time sign command)))
+    (eshell-git-prompt---str-read-only
+     (concat hr dir separator git git-dirty separator time sign command))))
 
 (defconst eshell-git-prompt-multiline-regexp "^[^$\n]*λ ")
 
@@ -623,7 +638,8 @@ It looks like:
     (setq command (with-face " " 'eshell-git-prompt-multiline2-command-face))
 
     ;; Build prompt
-    (concat beg usr at host separator dir git separator time sign command)))
+    (eshell-git-prompt---str-read-only
+     (concat beg usr at host separator dir git separator time sign command))))
 
 (defconst eshell-git-prompt-multiline2-regexp "^[^$\n]*└─>> ")
 
